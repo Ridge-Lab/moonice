@@ -10,6 +10,8 @@ pub fn decode_manifest(Bytes, Manifest) -> Array[ManifestEntry] raise IceError
 
 pub fn decode_manifest_list(Bytes) -> Array[Manifest] raise IceError
 
+pub fn explain_delete(TableMetadata, ManifestEntry, ManifestEntry) -> DeleteDecision raise IceError
+
 pub fn load_snapshot(TableMetadata, (String) -> Bytes raise IceError, snapshot_id? : Int64) -> SnapshotState raise IceError
 
 pub fn open_bundle(String) -> Bundle raise IceError
@@ -17,6 +19,8 @@ pub fn open_bundle(String) -> Bundle raise IceError
 pub fn parse_metadata(String) -> TableMetadata raise IceError
 
 pub fn parse_predicate(String, Schema) -> Predicate raise IceError
+
+pub fn plan_deletes(TableMetadata, SnapshotState, ScanPlan) -> Array[DeleteDecision] raise IceError
 
 pub fn plan_scan(TableMetadata, SnapshotState, Predicate) -> ScanPlan raise IceError
 
@@ -54,6 +58,14 @@ pub(all) struct DataFile {
   null_counts : Map[Int, Int64]
   nan_counts : Map[Int, Int64]
   equality_ids : Array[Int]
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct DeleteDecision {
+  data_path : String
+  delete_path : String
+  applies : Bool
+  reason_code : String
+  explanation : String
 } derive(Eq, ToJson, @debug.Debug)
 
 pub(all) struct Field {
