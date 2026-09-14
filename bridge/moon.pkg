@@ -1,0 +1,7 @@
+import {
+  "Ridge-Lab/moonice",
+}
+
+options(
+  link: { "js": { "exports": [ "run" ], "format": "esm" } },
+)

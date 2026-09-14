@@ -1,5 +1,9 @@
-// import {
-//   "uiwcvb/moonice" @lib,
-// }
+import {
+  "Ridge-Lab/moonice",
+  "moonbitlang/core/json",
+  "moonbitlang/core/encoding/base64",
+  "moonbitlang/x/fs",
+  "moonbitlang/x/sys",
+}
 
 pkgtype(kind: "executable")

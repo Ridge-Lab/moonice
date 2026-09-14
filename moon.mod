@@ -28,4 +28,5 @@ description = "MoonBit-native Iceberg v2 snapshot diagnostics and explainable sc
 import {
   "mizchi/parquet@0.2.1",
   "yugonlian/moon-avro@0.3.0",
+  "moonbitlang/x@0.4.40",
 }

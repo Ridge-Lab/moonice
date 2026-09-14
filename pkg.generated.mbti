@@ -30,6 +30,8 @@ pub fn plan_scan(TableMetadata, SnapshotState, Predicate) -> ScanPlan raise IceE
 
 pub fn read_data_rows(Bytes, DataFile) -> Array[DataRow] raise IceError
 
+pub fn run_request(String, String) -> String
+
 pub fn scan_rows(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, limit? : Int) -> ScanResult raise IceError
 
 // Errors
@@ -164,6 +166,7 @@ pub(all) enum Scalar {
   Text(String)
   Binary(Bytes)
 } derive(Eq, ToJson, @debug.Debug)
+pub fn Scalar::display_json(Self) -> Json
 
 pub(all) struct ScanPlan {
   snapshot_id : Int64
