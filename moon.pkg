@@ -1,3 +1,7 @@
 import {
   "moonbitlang/core/json",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/encoding/base64",
+  "yugonlian/moon-avro" @avro,
+  "yugonlian/moon-avro/codec" @avro_codec,
 }

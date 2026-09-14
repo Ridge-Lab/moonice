@@ -6,6 +6,14 @@ import {
 }
 
 // Values
+pub fn decode_manifest(Bytes, Manifest) -> Array[ManifestEntry] raise IceError
+
+pub fn decode_manifest_list(Bytes) -> Array[Manifest] raise IceError
+
+pub fn load_snapshot(TableMetadata, (String) -> Bytes raise IceError, snapshot_id? : Int64) -> SnapshotState raise IceError
+
+pub fn open_bundle(String) -> Bundle raise IceError
+
 pub fn parse_metadata(String) -> TableMetadata raise IceError
 
 // Errors
@@ -15,11 +23,52 @@ pub(all) suberror IceError {
 pub impl Show for IceError
 
 // Types and methods
+pub(all) struct Bundle {
+  metadata : TableMetadata
+  files : Map[String, Bytes]
+} derive(@debug.Debug)
+pub fn Bundle::load_snapshot(Self, snapshot_id? : Int64) -> SnapshotState raise IceError
+pub fn Bundle::read_file(Self, String) -> Bytes raise IceError
+
+pub(all) struct DataFile {
+  content : Int
+  path : String
+  format : String
+  partition : Map[String, Scalar]
+  record_count : Int64
+  size_bytes : Int64
+  lower_bounds : Map[Int, Bytes]
+  upper_bounds : Map[Int, Bytes]
+  null_counts : Map[Int, Int64]
+  nan_counts : Map[Int, Int64]
+  equality_ids : Array[Int]
+} derive(Eq, ToJson, @debug.Debug)
+
 pub(all) struct Field {
   id : Int
   name : String
   required : Bool
   field_type : Json
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct Manifest {
+  path : String
+  length : Int64
+  spec_id : Int
+  content : Int
+  sequence_number : Int64
+  min_sequence_number : Int64
+  added_snapshot_id : Int64
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct ManifestEntry {
+  manifest_path : String
+  spec_id : Int
+  status : Int
+  snapshot_id : Int64
+  sequence_number : Int64
+  file_sequence_number : Int64
+  file : DataFile
 } derive(Eq, ToJson, @debug.Debug)
 
 pub(all) struct PartitionField {
@@ -32,6 +81,15 @@ pub(all) struct PartitionField {
 pub(all) struct PartitionSpec {
   id : Int
   fields : Array[PartitionField]
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) enum Scalar {
+  Missing
+  Boolean(Bool)
+  Integer(Int64)
+  Real(Double)
+  Text(String)
+  Binary(Bytes)
 } derive(Eq, ToJson, @debug.Debug)
 
 pub(all) struct Schema {
@@ -56,6 +114,13 @@ pub(all) struct SnapshotRef {
   snapshot_id : Int64
   kind : String
 } derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct SnapshotState {
+  snapshot : Snapshot
+  schema : Schema
+  manifests : Array[Manifest]
+  entries : Array[ManifestEntry]
+} derive(ToJson, @debug.Debug)
 
 pub(all) struct TableMetadata {
   uuid : String

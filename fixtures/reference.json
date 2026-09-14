@@ -1,0 +1,135 @@
+[
+  {
+    "snapshot_id": "7153263061864200117",
+    "filter": "all",
+    "files": [
+      "memory://moonice-reference/demo/events/data/00000-0-ee9b3d85-3208-4094-b2e8-38bd6d048a8b.parquet"
+    ],
+    "rows": [
+      {
+        "id": 1,
+        "city": "北京",
+        "amount": 10
+      },
+      {
+        "id": 2,
+        "city": "深圳",
+        "amount": 20
+      },
+      {
+        "id": 3,
+        "city": null,
+        "amount": null
+      }
+    ]
+  },
+  {
+    "snapshot_id": "7153263061864200117",
+    "filter": "id_ge_10",
+    "files": [],
+    "rows": []
+  },
+  {
+    "snapshot_id": "7042406311668565404",
+    "filter": "all",
+    "files": [
+      "memory://moonice-reference/demo/events/data/00000-0-6c1df830-d559-4fb5-92f3-87382a429ec8.parquet",
+      "memory://moonice-reference/demo/events/data/00000-0-ee9b3d85-3208-4094-b2e8-38bd6d048a8b.parquet"
+    ],
+    "rows": [
+      {
+        "id": 1,
+        "city": "北京",
+        "amount": 10
+      },
+      {
+        "id": 2,
+        "city": "深圳",
+        "amount": 20
+      },
+      {
+        "id": 3,
+        "city": null,
+        "amount": null
+      },
+      {
+        "id": 10,
+        "city": "杭州",
+        "amount": 100
+      },
+      {
+        "id": 11,
+        "city": "上海",
+        "amount": 200
+      }
+    ]
+  },
+  {
+    "snapshot_id": "7042406311668565404",
+    "filter": "id_ge_10",
+    "files": [
+      "memory://moonice-reference/demo/events/data/00000-0-6c1df830-d559-4fb5-92f3-87382a429ec8.parquet"
+    ],
+    "rows": [
+      {
+        "id": 10,
+        "city": "杭州",
+        "amount": 100
+      },
+      {
+        "id": 11,
+        "city": "上海",
+        "amount": 200
+      }
+    ]
+  },
+  {
+    "snapshot_id": "7196740075219728026",
+    "filter": "all",
+    "files": [
+      "memory://moonice-reference/demo/events/data/00000-0-4d5cac6a-ec22-45a0-b21b-7622ea23cecf.parquet",
+      "memory://moonice-reference/demo/events/data/00000-0-6c1df830-d559-4fb5-92f3-87382a429ec8.parquet"
+    ],
+    "rows": [
+      {
+        "id": 1,
+        "city": "北京",
+        "amount": 10
+      },
+      {
+        "id": 3,
+        "city": null,
+        "amount": null
+      },
+      {
+        "id": 10,
+        "city": "杭州",
+        "amount": 100
+      },
+      {
+        "id": 11,
+        "city": "上海",
+        "amount": 200
+      }
+    ]
+  },
+  {
+    "snapshot_id": "7196740075219728026",
+    "filter": "id_ge_10",
+    "files": [
+      "memory://moonice-reference/demo/events/data/00000-0-6c1df830-d559-4fb5-92f3-87382a429ec8.parquet"
+    ],
+    "rows": [
+      {
+        "id": 10,
+        "city": "杭州",
+        "amount": 100
+      },
+      {
+        "id": 11,
+        "city": "上海",
+        "amount": 200
+      }
+    ]
+  }
+]
