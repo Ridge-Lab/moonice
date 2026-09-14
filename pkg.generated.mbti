@@ -28,6 +28,8 @@ pub fn plan_scan(TableMetadata, SnapshotState, Predicate) -> ScanPlan raise IceE
 
 pub fn read_data_rows(Bytes, DataFile) -> Array[DataRow] raise IceError
 
+pub fn scan_rows(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, limit? : Int) -> ScanResult raise IceError
+
 // Errors
 pub(all) suberror IceError {
   Invalid(String, String, String)
@@ -41,6 +43,7 @@ pub(all) struct Bundle {
 } derive(@debug.Debug)
 pub fn Bundle::load_snapshot(Self, snapshot_id? : Int64) -> SnapshotState raise IceError
 pub fn Bundle::read_file(Self, String) -> Bytes raise IceError
+pub fn Bundle::scan(Self, Predicate, snapshot_id? : Int64, limit? : Int) -> ScanResult raise IceError
 
 pub(all) enum CompareOp {
   Eq
@@ -152,6 +155,16 @@ pub(all) struct ScanPlan {
   decisions : Array[FileDecision]
   retained_bytes : Int64
   pruned_bytes : Int64
+} derive(ToJson, @debug.Debug)
+
+pub(all) struct ScanResult {
+  snapshot_id : Int64
+  schema : Schema
+  rows : Array[DataRow]
+  read_rows : Int
+  deleted_rows : Int
+  matched_rows : Int
+  truncated : Bool
 } derive(ToJson, @debug.Debug)
 
 pub(all) struct Schema {

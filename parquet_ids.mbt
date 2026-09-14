@@ -21,7 +21,7 @@ fn FooterReader::take(self : FooterReader, n : Int) -> Bytes raise IceError {
   if n < 0 || n > self.bytes.length() - self.offset {
     raise Invalid("INVALID_PARQUET", "footer", "Truncated compact value")
   }
-  let bytes = self.bytes[self.offset:self.offset + n].to_bytes()
+  let bytes = self.bytes[self.offset:self.offset + n].to_owned()
   self.offset += n
   bytes
 }
@@ -156,12 +156,12 @@ pub fn parquet_field_ids(bytes : Bytes) -> Array[Int] raise IceError {
   if n < 12 || bytes[:4] != b"PAR1" || bytes[n - 4:] != b"PAR1" {
     raise Invalid("INVALID_PARQUET", "footer", "Missing PAR1 magic")
   }
-  let length = little_integer(bytes[n - 8:n - 4].to_bytes(), 4).unwrap_or(-1L)
+  let length = little_integer(bytes[n - 8:n - 4].to_owned(), 4).unwrap_or(-1L)
   if length < 0 || length > (n - 12).to_int64() || length > 8L * 1024L * 1024L {
     raise Invalid("INVALID_PARQUET", "footer", "Invalid footer length")
   }
   let reader = FooterReader::{
-    bytes: bytes[n - 8 - length.to_int():n - 8].to_bytes(),
+    bytes: bytes[n - 8 - length.to_int():n - 8].to_owned(),
     offset: 0,
     nodes: 0,
   }
@@ -197,6 +197,9 @@ pub fn parquet_field_ids(bytes : Bytes) -> Array[Int] raise IceError {
       raise Invalid(
         "MISSING_FIELD_ID", "schema", "Every leaf requires an explicit positive Parquet field_id",
       )
+    }
+    guard leaf.get(4) is Some(Blob(name)) && !name.is_empty() else {
+      raise Invalid("INVALID_PARQUET", "schema", "Leaf column name is absent")
     }
     if seen.contains(id) {
       raise Invalid(
