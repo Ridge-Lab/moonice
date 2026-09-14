@@ -13,9 +13,9 @@ name = "Ridge-Lab/moonice"
 
 version = "0.1.0"
 
-readme = "README.mbt.md"
+readme = "README.md"
 
-repository = ""
+repository = "https://github.com/Ridge-Lab/moonice"
 
 license = "Apache-2.0"
 
