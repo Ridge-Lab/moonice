@@ -1,0 +1,5 @@
+// import {
+//   "uiwcvb/moonice" @lib,
+// }
+
+pkgtype(kind: "executable")

@@ -1,0 +1,77 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Ridge-Lab/moonice"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn parse_metadata(String) -> TableMetadata raise IceError
+
+// Errors
+pub(all) suberror IceError {
+  Invalid(String, String, String)
+} derive(@debug.Debug)
+pub impl Show for IceError
+
+// Types and methods
+pub(all) struct Field {
+  id : Int
+  name : String
+  required : Bool
+  field_type : Json
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct PartitionField {
+  source_id : Int
+  field_id : Int
+  name : String
+  transform : String
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct PartitionSpec {
+  id : Int
+  fields : Array[PartitionField]
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct Schema {
+  id : Int
+  fields : Array[Field]
+} derive(Eq, ToJson, @debug.Debug)
+pub fn Schema::field(Self, Int) -> Field?
+pub fn Schema::field_named(Self, String) -> Field raise IceError
+
+pub(all) struct Snapshot {
+  id : Int64
+  parent_id : Int64?
+  sequence_number : Int64
+  timestamp_ms : Int64
+  manifest_list : String
+  schema_id : Int?
+  operation : String
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct SnapshotRef {
+  name : String
+  snapshot_id : Int64
+  kind : String
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct TableMetadata {
+  uuid : String
+  location : String
+  current_schema_id : Int
+  default_spec_id : Int
+  last_sequence_number : Int64
+  current_snapshot_id : Int64?
+  schemas : Array[Schema]
+  partition_specs : Array[PartitionSpec]
+  snapshots : Array[Snapshot]
+  refs : Array[SnapshotRef]
+} derive(ToJson, @debug.Debug)
+pub fn TableMetadata::schema(Self, Int) -> Schema raise IceError
+pub fn TableMetadata::snapshot(Self, id? : Int64, ref_name? : String) -> Snapshot raise IceError
+
+// Type aliases
+
+// Traits
