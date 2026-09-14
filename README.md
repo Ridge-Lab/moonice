@@ -6,6 +6,8 @@
 
 这是可运行的 **0.1.0 有界实现**。支持范围见 [兼容性说明](docs/COMPATIBILITY.md)，不代表完整 Iceberg 引擎或生产级数据湖服务。
 
+[在线体验](https://ridge-lab.github.io/moonice/) · [构建与测试记录](https://github.com/Ridge-Lab/moonice/actions/workflows/ci.yml) · [API 示例](README.mbt.md)
+
 ## 五分钟运行
 
 需要 MoonBit（本地验证：`moonc v0.10.8+8606a5800`）、Node.js。Python 仅用于可选的参考数据生成和本地静态文件服务。
@@ -115,4 +117,4 @@ moon test --target wasm
 
 欢迎提供最小标准 Iceberg 样本和可复现错误。新增支持必须补充独立格式实现产生的数据或规范边界测试，并更新兼容性表。当前尚无外部生产部署或第三方采用的证据，不声称已有这些成果。
 
-许可证：[Apache-2.0](LICENSE)。本项目使用 AI 辅助开发，编译、参考对照和人工操作测试记录均如实列出；参赛者需亲自理解、审查并维护提交成果。
+许可证：[Apache-2.0](LICENSE)。本项目使用 AI 辅助开发，编译、参考对照和界面操作验证记录均如实列出；参赛者需亲自理解、审查并维护提交成果。

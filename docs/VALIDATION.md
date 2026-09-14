@@ -11,7 +11,7 @@ Environment: Windows, 2026-09-14, `moon 0.1.20260814`, `moonc v0.10.8+8606a5800`
 - Independently written standard delete fixtures have five physical rows, three deleted rows, and two surviving rows. Equal-sequence newly added data survives equality deletes; nullable equality keys and physical positions are covered.
 - Exhaustive small integer intervals test that any file-pruning proof excludes every value in that interval; boundary comparisons use all five comparison operators.
 - Sequence test matrix covers equality strict inequality versus position non-strict inequality, plus global equality deletes and partition mismatches.
-- Browser manual integration: default `id >= 10` yields two rows, one retained file and one pruned file; changing to all records yields four rows; delete demo yields two survivors; missing-manifest demo yields a path-specific failure and clears stale data.
+- Browser integration exercised through automated UI controls: default `id >= 10` yields two rows, one retained file and one pruned file; changing to all records yields four rows; delete demo yields two survivors; missing-manifest demo yields a path-specific failure and clears stale data.
 
 ## Commands
 
@@ -25,7 +25,21 @@ moon run --target js cmd/main -- check fixtures/events.icebundle.json
 moon run --target js cmd/main -- scan fixtures/deletes.icebundle.json --limit 1
 ```
 
-`.github/workflows/ci.yml` configures Linux checks for Wasm, Wasm GC, JS and native, plus a downloadable web build. A configured workflow is not evidence of a successful remote run. See the actual repository Actions results after publication.
+## Observed in GitHub Actions
+
+[Run 34809558099](https://github.com/Ridge-Lab/moonice/actions/runs/34809558099)
+passed for commit `ff2c2c3` on Ubuntu: all 31 tests on each of Wasm, Wasm GC,
+JavaScript and native; release builds; real JS/native CLI scans; web build
+and GitHub Pages deployment. The [online workbench](https://ridge-lab.github.io/moonice/)
+uses that compiled MoonBit core.
+
+Initial native CI runs exposed a link incompatibility in
+`moonbitlang/x/sys.get_cli_args`. The CLI now reads `moonbitlang/core/env.args`
+and normalizes Node's extra executable argument. All-package native tests and
+the actual native executable pass after this change; the failed runs remain
+visible in history. On Windows, JS/Wasm/Wasm GC CLI scans also passed after
+the change, preserving five rows read, three removed, two matched and correct
+output-limit truncation.
 
 ## Reproducibility and evidence limits
 
