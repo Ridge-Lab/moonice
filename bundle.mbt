@@ -115,6 +115,22 @@ pub fn load_snapshot(
       )
     }
     for entry in decode_manifest(read_file(manifest.path), manifest) {
+      let spec = self_spec(metadata, entry.spec_id)
+      if entry.file.partition.length() != spec.fields.length() ||
+        !spec.fields.iter().all(f => entry.file.partition.contains(f.name)) {
+        raise Invalid(
+          "INVALID_PARTITION",
+          entry.file.path,
+          "Partition values disagree with the manifest partition spec",
+        )
+      }
+      if entry.sequence_number > entry.file_sequence_number {
+        raise Invalid(
+          "INVALID_SEQUENCE",
+          entry.file.path,
+          "Data sequence cannot exceed file sequence",
+        )
+      }
       if entry.sequence_number > snapshot.sequence_number ||
         entry.file_sequence_number > snapshot.sequence_number {
         raise Invalid(
@@ -137,6 +153,20 @@ pub fn load_snapshot(
     }
   }
   { snapshot, schema, manifests, entries }
+}
+
+///|
+fn self_spec(
+  metadata : TableMetadata,
+  id : Int,
+) -> PartitionSpec raise IceError {
+  match metadata.partition_specs.iter().find_first(s => s.id == id) {
+    Some(s) => s
+    None =>
+      raise Invalid(
+        "SPEC_NOT_FOUND", "partition-spec", "Partition spec is missing",
+      )
+  }
 }
 
 ///|

@@ -131,7 +131,13 @@ fn container_records(
       "RESOURCE_LIMIT", path, "A manifest container must not exceed 64 MiB",
     )
   }
-  let (_, rows) = @avro.decode_container(data) catch {
+  let limits : @avro.OcfLimits = {
+    max_metadata_entries: 128,
+    max_metadata_bytes: 1048576,
+    max_block_bytes: 8 * 1048576,
+    max_records_per_block: 100000,
+  }
+  let (_, rows) = @avro.decode_container(data, limits~) catch {
     @avro.OcfError::UnsupportedCodec(codec) =>
       raise Invalid(
         "UNSUPPORTED_AVRO_CODEC",

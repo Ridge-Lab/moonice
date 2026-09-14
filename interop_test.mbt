@@ -42,3 +42,29 @@ test "missing manifest reports the actual object path" {
     _ => fail("Must not silently return an empty scan")
   }
 }
+
+///|
+test "manifest header mismatch is rejected before applying partition semantics" {
+  let bundle = @moonice.open_bundle(reference_bundle)
+  let manifest = bundle.load_snapshot().manifests[0]
+  let (header, rows) = @avro.decode_container(bundle.read_file(manifest.path))
+  let metadata = header.metadata()
+  metadata["partition-spec-id"] = @utf8.encode("999")
+  let modified = @avro.OcfHeader::new(
+    header.schema(),
+    codec=header.codec(),
+    metadata~,
+    header.sync_marker(),
+  )
+  let bytes = @avro.encode_container(modified, rows)
+  try
+    @moonice.decode_manifest(bytes, {
+      ..manifest,
+      length: bytes.length().to_int64(),
+    })
+  catch {
+    @moonice.Invalid(code, _, _) => assert_eq(code, "MANIFEST_HEADER")
+  } noraise {
+    _ => fail("Mismatched spec must fail")
+  }
+}

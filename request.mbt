@@ -55,7 +55,10 @@ fn request_inner(source : String, options : String) -> Json raise IceError {
   if action == "check" {
     return bundle.diagnose().to_json()
   }
-  let id = opt_long(json_field(opts, "snapshot"), "snapshot")
+  let id = match json_field(opts, "snapshot") {
+    Null => None
+    value => Some(argument_long(value, "snapshot"))
+  }
   let ref_name = match json_field(opts, "ref") {
     Null => None
     String(s) => Some(s)
@@ -73,7 +76,7 @@ fn request_inner(source : String, options : String) -> Json raise IceError {
     None => bundle.load_snapshot()
   }
   if action == "diff" {
-    let from = long_value(json_field(opts, "from"), "from")
+    let from = argument_long(json_field(opts, "from"), "from")
     return diff_snapshots(bundle.load_snapshot(snapshot_id=from), state).to_json()
   }
   let predicate = parse_predicate(

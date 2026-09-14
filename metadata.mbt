@@ -101,7 +101,10 @@ fn parse_schema(j : Json) -> Schema raise IceError {
       required: bool_value(json_field(f, "required"), "field.required"),
       field_type: json_field(f, "type"),
     }
-    if field.id <= 0 || field.name.is_empty() || field.field_type is Null {
+    if field.id <= 0 ||
+      field.id > 2147483447 ||
+      field.name.is_empty() ||
+      field.field_type is Null {
       raise Invalid(
         "INVALID_SCHEMA",
         "schema[\{id}]",
@@ -205,6 +208,11 @@ fn validate_metadata(table : TableMetadata) -> Unit raise IceError {
   for s in table.snapshots {
     if snapshots.contains(s.id) {
       raise Invalid("DUPLICATE_SNAPSHOT", "snapshots", "Duplicate snapshot ID")
+    }
+    if s.schema_id is Some(id) && !schemas.contains(id) {
+      raise Invalid(
+        "SCHEMA_NOT_FOUND", "snapshot.schema-id", "Snapshot schema is missing",
+      )
     }
     if s.sequence_number > table.last_sequence_number {
       raise Invalid(

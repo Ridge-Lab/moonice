@@ -14,7 +14,11 @@ fn same_partition(a : ManifestEntry, b : ManifestEntry) -> Bool {
     return false
   }
   for key, value in a.file.partition {
-    if b.file.partition.get(key) != Some(value) {
+    let equal = match (value, b.file.partition.get(key)) {
+      (Real(x), Some(Real(y))) => (x.is_nan() && y.is_nan()) || x == y
+      (_, other) => other == Some(value)
+    }
+    if !equal {
       return false
     }
   }

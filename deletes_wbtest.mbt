@@ -65,6 +65,16 @@ fn delete_test_entry(
 }
 
 ///|
+test "NaN identity partitions match for delete applicability" {
+  let nan = 0x7ff8000000000000L.reinterpret_as_double()
+  let data = delete_test_entry(0, 1L, spec=1)
+  let deletion = delete_test_entry(1, 2L, spec=1)
+  data.file.partition["region"] = Real(nan)
+  deletion.file.partition["region"] = Real(nan)
+  assert_true(explain_delete(delete_test_metadata(), data, deletion).applies)
+}
+
+///|
 test "delete sequence boundary matrix follows Iceberg v2" {
   let metadata = delete_test_metadata()
   for data_seq in 0..<5 {

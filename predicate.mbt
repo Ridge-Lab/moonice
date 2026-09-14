@@ -170,7 +170,7 @@ pub fn parse_predicate(
     let jvalue = json_field(j, "value")
     let value = match f.field_type {
       String("int" | "long" | "date" | "time" | "timestamp" | "timestamptz") =>
-        Integer(long_value(jvalue, "filter.value"))
+        Integer(argument_long(jvalue, "filter.value"))
       String("float" | "double") =>
         match jvalue {
           Number(n, ..) => Real(n)

@@ -70,6 +70,23 @@ fn opt_long(j : Json, path : String) -> Int64? raise IceError {
 }
 
 ///|
+// UI/CLI arguments allow decimal strings without weakening metadata validation.
+fn argument_long(j : Json, path : String) -> Int64 raise IceError {
+  match j {
+    String(s) => {
+      let value = @json.parse(s) catch {
+        _ =>
+          raise Invalid(
+            "INVALID_INTEGER", path, "Expected a decimal integer string",
+          )
+      }
+      long_value(value, path)
+    }
+    _ => long_value(j, path)
+  }
+}
+
+///|
 fn opt_int(j : Json, path : String) -> Int? raise IceError {
   match j {
     Null => None

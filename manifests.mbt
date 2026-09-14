@@ -69,6 +69,25 @@ pub fn decode_manifest(
       "Manifest length disagrees with the manifest list",
     )
   }
+  let (header, _) = @avro.decode_header(data) catch {
+    err => raise Invalid("INVALID_AVRO", manifest.path, "\{Repr(err)}")
+  }
+  for
+    pair in [
+      ("format-version", "2"),
+      ("partition-spec-id", manifest.spec_id.to_string()),
+      ("content", if manifest.content == 0 { "data" } else { "deletes" }),
+    ] {
+    let (key, expected) = pair
+    guard header.metadata().get(key) is Some(value) &&
+      value == @utf8.encode(expected) else {
+      raise Invalid(
+        "MANIFEST_HEADER",
+        manifest.path,
+        "Header \{key} disagrees with v2 manifest descriptor",
+      )
+    }
+  }
   container_records(data, manifest.path).map(row => {
     let status = avro_int(avro_field(row, "status"), "status")
     if status < 0 || status > 2 {
@@ -144,6 +163,15 @@ fn parse_data_file(d : @avro_codec.Datum) -> DataFile raise IceError {
     raise Invalid(
       "INVALID_EQUALITY_IDS", path, "Equality deletes require field IDs",
     )
+  }
+  let seen_ids : Map[Int, Bool] = Map([])
+  for id in equality_ids {
+    if id <= 0 || id > 2147483447 || seen_ids.contains(id) {
+      raise Invalid(
+        "INVALID_EQUALITY_IDS", path, "Equality IDs must be valid and unique",
+      )
+    }
+    seen_ids[id] = true
   }
   {
     path,

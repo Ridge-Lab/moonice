@@ -28,3 +28,23 @@ test "JSON API returns useful typed errors and exact snapshot IDs" {
     fail("Expected two surviving rows")
   }
 }
+
+///|
+test "browser decimal string arguments retain exact precision" {
+  let source = "{\"action\":\"scan\",\"snapshot\":\"101\",\"filter\":{\"field\":\"id\",\"op\":\">=\",\"value\":\"2\"}}"
+  guard @json.parse(@moonice.run_request(delete_bundle, source))
+    is {
+      "ok": True,
+      "result": { "scan": { "matched_rows": Number(2, ..), .. }, .. },
+      ..
+    } else {
+    fail("Browser string arguments should scan")
+  }
+  let schema = @moonice.open_bundle(delete_bundle).load_snapshot().schema
+  assert_eq(
+    @moonice.parse_predicate(
+      "{\"field\":\"id\",\"op\":\"=\",\"value\":\"9007199254740993\"}", schema,
+    ),
+    Compare(1, Eq, Integer(9007199254740993L)),
+  )
+}
