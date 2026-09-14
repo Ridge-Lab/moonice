@@ -11,5 +11,8 @@ fn main raise {
       @fs.read_file_to_bytes("fixtures/" + name),
     )
   }
+  for name in ["LICENSE", "THIRD_PARTY.md"] {
+    @fs.write_bytes_to_file("web/" + name, @fs.read_file_to_bytes(name))
+  }
   println("Web assets prepared in web/")
 }
