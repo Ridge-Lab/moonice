@@ -18,7 +18,7 @@ GitHub Actions 同时构建并运行 JS/native 命令行，再部署网页。
 验证证据和曾出现的原生接口兼容问题见 [VALIDATION](VALIDATION.md)。
 
 下载包：源码保留在 GitHub；`moonice-web-0.1.0.zip` 可解压后用静态 HTTP
-服务运行；`moonice-cli-0.1.0.zip` 可用 Node.js 执行 `node moonice.mjs --help`。
+服务运行；`moonice-cli-0.1.0.zip` 可用 Node.js 执行 `node moonice.cjs --help`。
 浏览器包包含合成演示数据；自行导入的数据仅在本地浏览器处理。
 
 本版面向有界诊断样本：不支持表写入、REST catalog / S3 网络客户端、
