@@ -4,4 +4,5 @@ import {
   "moonbitlang/core/encoding/base64",
   "yugonlian/moon-avro" @avro,
   "yugonlian/moon-avro/codec" @avro_codec,
+  "mizchi/parquet",
 }

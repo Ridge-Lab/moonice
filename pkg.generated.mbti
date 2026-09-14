@@ -16,6 +16,8 @@ pub fn load_snapshot(TableMetadata, (String) -> Bytes raise IceError, snapshot_i
 
 pub fn open_bundle(String) -> Bundle raise IceError
 
+pub fn parquet_field_ids(Bytes) -> Array[Int] raise IceError
+
 pub fn parse_metadata(String) -> TableMetadata raise IceError
 
 pub fn parse_predicate(String, Schema) -> Predicate raise IceError
@@ -23,6 +25,8 @@ pub fn parse_predicate(String, Schema) -> Predicate raise IceError
 pub fn plan_deletes(TableMetadata, SnapshotState, ScanPlan) -> Array[DeleteDecision] raise IceError
 
 pub fn plan_scan(TableMetadata, SnapshotState, Predicate) -> ScanPlan raise IceError
+
+pub fn read_data_rows(Bytes, DataFile) -> Array[DataRow] raise IceError
 
 // Errors
 pub(all) suberror IceError {
@@ -59,6 +63,13 @@ pub(all) struct DataFile {
   nan_counts : Map[Int, Int64]
   equality_ids : Array[Int]
 } derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct DataRow {
+  file_path : String
+  position : Int64
+  values : Map[Int, Scalar]
+} derive(Eq, ToJson, @debug.Debug)
+pub fn DataRow::project(Self, Schema) -> Map[String, Scalar] raise IceError
 
 pub(all) struct DeleteDecision {
   data_path : String
