@@ -1,0 +1,11 @@
+{
+  "name": "moonice-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local build commands for the MoonBit MoonIce inspector",
+  "scripts": {
+    "build": "moon build --release --target js && moon run tools/prepare_web.mbtx",
+    "test": "moon test --target wasm && moon test --target js && moon test --target wasm-gc",
+    "cli": "moon run --target js cmd/main --"
+  }
+}

@@ -4,3 +4,5 @@ target/
 target
 .mooncakes/
 .moonagent/
+web/moonice.js
+web/*.icebundle.json
