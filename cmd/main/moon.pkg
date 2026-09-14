@@ -2,6 +2,7 @@ import {
   "Ridge-Lab/moonice",
   "moonbitlang/core/json",
   "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/env",
   "moonbitlang/x/fs",
   "moonbitlang/x/sys",
 }

@@ -21,10 +21,7 @@ jobs:
       - run: moon version --all
       - run: moon update
       - run: moon check --target ${{ matrix.target }} --deny-warn
-      # The pinned compiler's empty CLI test harness does not emit the native
-      # argument intrinsic. All authored tests live in the library package;
-      # exercise the real CLI entry point separately below.
-      - run: moon test --package Ridge-Lab/moonice --target ${{ matrix.target }}
+      - run: moon test --target ${{ matrix.target }}
       - run: moon build --target ${{ matrix.target }} --release
       - name: Exercise CLI entry point
         if: matrix.target == 'js' || matrix.target == 'native'

@@ -115,8 +115,27 @@ fn execute(args : Array[String]) -> Int raise {
 }
 
 ///|
+// Node supplies both the runtime executable and script path. Keep the script
+// path as argv[0], matching the native and Wasm command-line conventions.
+#cfg(target="js")
+fn cli_args() -> Array[String] {
+  let args = @env.args()
+  if args.is_empty() {
+    []
+  } else {
+    args[1:].to_owned()
+  }
+}
+
+///|
+#cfg(not(target="js"))
+fn cli_args() -> Array[String] {
+  @env.args()
+}
+
+///|
 fn main {
-  let code = execute(@sys.get_cli_args()) catch {
+  let code = execute(cli_args()) catch {
     error => {
       println("MoonIce: \{error}")
       2
