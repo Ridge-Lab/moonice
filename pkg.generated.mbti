@@ -10,6 +10,8 @@ pub fn decode_manifest(Bytes, Manifest) -> Array[ManifestEntry] raise IceError
 
 pub fn decode_manifest_list(Bytes) -> Array[Manifest] raise IceError
 
+pub fn diff_snapshots(SnapshotState, SnapshotState) -> SnapshotDiff
+
 pub fn explain_delete(TableMetadata, ManifestEntry, ManifestEntry) -> DeleteDecision raise IceError
 
 pub fn load_snapshot(TableMetadata, (String) -> Bytes raise IceError, snapshot_id? : Int64) -> SnapshotState raise IceError
@@ -41,6 +43,7 @@ pub(all) struct Bundle {
   metadata : TableMetadata
   files : Map[String, Bytes]
 } derive(@debug.Debug)
+pub fn Bundle::diagnose(Self) -> Diagnosis
 pub fn Bundle::load_snapshot(Self, snapshot_id? : Int64) -> SnapshotState raise IceError
 pub fn Bundle::read_file(Self, String) -> Bytes raise IceError
 pub fn Bundle::scan(Self, Predicate, snapshot_id? : Int64, limit? : Int) -> ScanResult raise IceError
@@ -82,6 +85,12 @@ pub(all) struct DeleteDecision {
   explanation : String
 } derive(Eq, ToJson, @debug.Debug)
 
+pub(all) struct Diagnosis {
+  checked_snapshots : Int
+  checked_objects : Int
+  findings : Array[Finding]
+} derive(ToJson, @debug.Debug)
+
 pub(all) struct Field {
   id : Int
   name : String
@@ -95,6 +104,14 @@ pub(all) struct FileDecision {
   reason_code : String
   explanation : String
 } derive(ToJson, @debug.Debug)
+
+pub(all) struct Finding {
+  severity : String
+  code : String
+  path : String
+  explanation : String
+  snapshot_id : Int64?
+} derive(Eq, ToJson, @debug.Debug)
 
 pub(all) struct Manifest {
   path : String
@@ -174,6 +191,13 @@ pub(all) struct Schema {
 pub fn Schema::field(Self, Int) -> Field?
 pub fn Schema::field_named(Self, String) -> Field raise IceError
 
+pub(all) struct SchemaChange {
+  field_id : Int
+  kind : String
+  before : Field?
+  after : Field?
+} derive(ToJson, @debug.Debug)
+
 pub(all) struct Snapshot {
   id : Int64
   parent_id : Int64?
@@ -183,6 +207,17 @@ pub(all) struct Snapshot {
   schema_id : Int?
   operation : String
 } derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct SnapshotDiff {
+  from_id : Int64
+  to_id : Int64
+  added : Array[ManifestEntry]
+  removed : Array[ManifestEntry]
+  retained_files : Int
+  added_records : Int64
+  removed_records : Int64
+  schema_changes : Array[SchemaChange]
+} derive(ToJson, @debug.Debug)
 
 pub(all) struct SnapshotRef {
   name : String
