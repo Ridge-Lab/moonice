@@ -8,6 +8,22 @@
 
 [在线体验](https://ridge-lab.github.io/moonice/) · [构建与测试记录](https://github.com/Ridge-Lab/moonice/actions/workflows/ci.yml) · [API 示例](README.mbt.md)
 
+## 对 MoonBit 数据工具有什么用
+
+Mooncakes 已有 [Avro](https://github.com/yugonlian/moon-avro) 和 [Parquet](https://github.com/mizchi/parquet) 库，负责解码文件。应用读取 Iceberg 表时，还需要知道所选快照包含哪些文件、哪些删除影响哪些数据，以及字段改名后如何读取旧列。MoonIce 复用这些格式库，实现上层表语义，并向 MoonBit 调用方开放扫描计划、删除关联和行结果。
+
+例如，本仓库删除样本的数据文件包含 **5 行**，按表的删除规则处理后只有 **2 行**。只读 Parquet 内容会保留已经删除的记录。运行以下接入示例，可以看到删除序列号如何决定新旧记录的可见性：
+
+```sh
+moon run --target js examples/library_read
+```
+
+[示例源码](examples/library_read/main.mbt)直接调用公共库 API。CLI、网页和这个示例是同一项目的不同入口，不是外部采用案例。
+
+这层 API 面向需要在 MoonBit 中编写数据读取器、诊断工具和兼容性检查的开发者。已有 [DuckDB 绑定](https://github.com/f4ah6o/duckdb.mbt)也是实际的替代路径，普通 SQL 查询可以优先评估它。MoonIce 的取舍是让表语义和中间决策可在 MoonBit 内直接组合，核心能编译到 JS、Wasm、Wasm GC 和 native；目前读取范围比完整查询引擎窄，尚未证明性能或生产适用性优于现有引擎。
+
+详细比较、接入方法及需求验证边界见[生态定位](docs/ECOSYSTEM.md)。
+
 ## 五分钟运行
 
 需要 MoonBit（本地验证：`moonc v0.10.8+8606a5800`）、Node.js。Python 仅用于可选的参考数据生成和本地静态文件服务。

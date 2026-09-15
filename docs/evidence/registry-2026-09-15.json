@@ -1,0 +1,62 @@
+{
+  "checked_on": "2026-09-15",
+  "source": "https://mooncakes.io/api/v0/modules",
+  "returned_modules": 2487,
+  "fields_searched": [
+    "name",
+    "description",
+    "keywords"
+  ],
+  "pattern": "iceberg|lakehouse|data.?lake|delta.?lake|hudi|paimon|parquet|avro|arrow|dataframe|duckdb",
+  "matches": [
+    {
+      "name": "codeworm96/magpiedb",
+      "version": "0.2.0",
+      "description": "vibe coded lightweight OLAP database",
+      "repository": "https://github.com/codeworm96/magpiedb"
+    },
+    {
+      "name": "f4ah6o/duckdb",
+      "version": "0.6.3",
+      "description": "",
+      "repository": "https://github.com/f4ah6o/duckdb.mbt"
+    },
+    {
+      "name": "ihb2032/MoonFrame",
+      "version": "0.6.0",
+      "description": "A lightweight DataFrame and tabular-data library for MoonBit",
+      "repository": "https://github.com/ihb2032/MoonFrame"
+    },
+    {
+      "name": "mizchi/parquet",
+      "version": "0.2.1",
+      "description": "Parquet reader/writer for MoonBit.",
+      "repository": "https://github.com/mizchi/parquet"
+    },
+    {
+      "name": "Ridge-Lab/moonice",
+      "version": "0.1.0",
+      "description": "MoonBit-native Iceberg v2 snapshot diagnostics and explainable scan planning.",
+      "repository": "https://github.com/Ridge-Lab/moonice"
+    },
+    {
+      "name": "shunge/arrow",
+      "version": "0.1.0",
+      "description": "MoonArrow: pure MoonBit Arrow IPC stream and file reader/writer with checked metadata and PyArrow interoperability.",
+      "repository": "https://github.com/buildliming/MoonArrow"
+    },
+    {
+      "name": "smallbearrr/pandas",
+      "version": "0.7.1",
+      "description": "Provide efficient data manipulation and analysis",
+      "repository": "https://github.com/moonbit-community/pandas"
+    },
+    {
+      "name": "yugonlian/moon-avro",
+      "version": "0.3.0",
+      "description": "Pure MoonBit Apache Avro schema, datum codec, and Object Container File toolkit.",
+      "repository": "https://github.com/yugonlian/moon-avro"
+    }
+  ],
+  "limitations": "Metadata keyword review, not a source audit of every module. No absence, uniqueness, adoption, or demand guarantee."
+}

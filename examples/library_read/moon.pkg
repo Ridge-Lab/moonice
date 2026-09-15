@@ -1,0 +1,7 @@
+import {
+  "Ridge-Lab/moonice",
+  "moonbitlang/x/fs",
+  "moonbitlang/x/sys",
+}
+
+pkgtype(kind: "executable")

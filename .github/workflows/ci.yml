@@ -26,6 +26,8 @@ jobs:
       - name: Exercise CLI entry point
         if: matrix.target == 'js' || matrix.target == 'native'
         run: moon run --target ${{ matrix.target }} cmd/main -- scan fixtures/deletes.icebundle.json --limit 1
+      - name: Exercise public library integration
+        run: moon run --target ${{ matrix.target }} examples/library_read
   web:
     runs-on: ubuntu-latest
     steps:

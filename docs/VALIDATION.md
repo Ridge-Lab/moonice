@@ -41,6 +41,14 @@ visible in history. On Windows, JS/Wasm/Wasm GC CLI scans also passed after
 the change, preserving five rows read, three removed, two matched and correct
 output-limit truncation.
 
+## Public library integration, 2026-09-15
+
+- Added `examples/library_read`, which calls public snapshot, planning, delete-association and row-reading APIs without the CLI or web request dispatcher. It uses the already supported 0.1.0 APIs; core implementation and existing test counts are unchanged.
+- Locally ran the example on JS, Wasm and Wasm GC. All returned five physical rows, three deleted rows, two visible rows and only `{"id":"2","category":"new"}` for the selected ID. `moon check --target all --deny-warn --frozen` passed.
+- Copied the example into a separate consumer module depending on the registry-downloaded `Ridge-Lab/moonice@0.1.0` and `moonbitlang/x@0.4.40`, with no local path dependency. JS and Wasm execution produced the same results.
+- CI now runs this integration entry point for every backend in addition to the existing checks. Local Windows native execution remains unverified; check the corresponding GitHub Actions run for its result.
+- The consumer was created and run by this project's developer as an integration check. It is not evidence of third-party adoption.
+
 ## Reproducibility and evidence limits
 
 `tools/reference.py` executes PyIceberg/PyArrow, with pinned packages in `requirements-reference.txt`. It regenerates the same semantic sequence with newly assigned IDs. `tools/delete_reference.py` uses Avro schemas from that fixture and independent fastavro/PyArrow writers. Its expected deletion results are specification-derived; no PyIceberg equality-delete execution is claimed.

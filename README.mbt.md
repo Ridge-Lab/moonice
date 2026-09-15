@@ -80,4 +80,4 @@ let result = @moonice.scan_rows(metadata, state, predicate, path => {
 })
 ```
 
-`storage_read` is an application-provided `(String) -> Bytes raise @moonice.IceError` callback. It receives original object URIs and does not need directory listing. Core APIs never open sockets or local files themselves. For a complete executable integration with real data, run `cmd/main`.
+`storage_read` is an application-provided `(String) -> Bytes raise @moonice.IceError` callback. It receives original object URIs and does not need directory listing. Core APIs never open sockets or local files themselves. For a complete executable integration using public library APIs and standard file bytes, run `moon run --target js examples/library_read`. See [the source](examples/library_read/main.mbt) and [integration notes](docs/ECOSYSTEM.md#在另一个-moonbit-项目中接入).
