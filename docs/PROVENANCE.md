@@ -7,9 +7,8 @@ and inspection surface. The authoritative format reference is the
 The implementation is developed with AI assistance. Generated changes are
 compiled and tested, and limitations and measured results are recorded in the
 repository. AI assistance must not be represented as unassisted human authorship.
-The entrant remains responsible for reviewing, understanding and maintaining the
-submitted work. Technical fact sheets are not a substitute for any competition
-rule requiring the entrant to write the application prose personally.
+The maintainer remains responsible for reviewing, understanding and maintaining
+the implementation.
 
 ## Dependencies
 

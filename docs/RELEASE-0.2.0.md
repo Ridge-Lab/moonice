@@ -2,7 +2,7 @@
 
 MoonBit 原生 Iceberg v2 读取组件。本版补上分区演进和批次 API，并提供可运行的 MoonFrame 接入。
 
-[在线体验](https://ridge-lab.github.io/moonice/) · [验收证据](https://github.com/Ridge-Lab/moonice/blob/main/docs/ACCEPTANCE.md) · [兼容范围](https://github.com/Ridge-Lab/moonice/blob/v0.2.0/docs/COMPATIBILITY.md)
+[在线体验](https://ridge-lab.github.io/moonice/) · [验证记录](https://github.com/Ridge-Lab/moonice/blob/main/docs/ACCEPTANCE.md) · [兼容范围](https://github.com/Ridge-Lab/moonice/blob/v0.2.0/docs/COMPATIBILITY.md)
 
 - 支持 bucket、truncate、year/month/day/hour，按各 manifest 的规格处理新旧分区；201 组 PyIceberg 对照值覆盖精度、负时间戳、闰年和 Unicode 边界。
 - 新增 `scan_batches` 和 `ScanSummary`：先删除、后过滤，再逐批交付；删除索引在数据文件之间复用。原有 API 保持兼容。

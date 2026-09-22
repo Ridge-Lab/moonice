@@ -25,4 +25,4 @@ GitHub Actions 同时构建并运行 JS/native 命令行，再部署网页。
 流式大表扫描、nested/decimal/UUID 行投影或完整格式认证。详见
 [COMPATIBILITY](COMPATIBILITY.md)。没有生产采用、性能领先或获奖保证。
 
-Apache-2.0。使用 AI 辅助开发并公开来源；本说明不是赛事申报书。
+Apache-2.0。使用 AI 辅助开发并公开来源。

@@ -9,3 +9,9 @@ web/*.icebundle.json
 web/LICENSE
 web/THIRD_PARTY.md
 integrations/moonframe/moon.work
+
+# Entrant forms and private handoff bundles belong outside this repository.
+*申报*
+MoonIce-完整交付包*
+MoonIce-验收交付清单*
+MoonIce-赛事验收依据*
