@@ -1,0 +1,23 @@
+import { "moonbitlang/x/fs" }
+
+// Run after `moon build --release --target js`. Archives are made from this
+// explicit staging tree, never from caches, credentials or the whole workspace.
+fn main raise {
+  let root = "_build/distribution/cli"
+  for dir in ["_build/distribution", root, root + "/fixtures"] {
+    if !@fs.path_exists(dir) { @fs.create_dir(dir) }
+  }
+  @fs.write_bytes_to_file(root + "/moonice.cjs",
+    @fs.read_file_to_bytes("_build/js/release/build/cmd/main/main.js"))
+  for name in ["events.icebundle.json", "deletes.icebundle.json",
+    "partitioned.icebundle.json", "id-ge-10.filter.json", "ts-ge-march.filter.json"] {
+    @fs.write_bytes_to_file(root + "/fixtures/" + name,
+      @fs.read_file_to_bytes("fixtures/" + name))
+  }
+  for name in ["LICENSE", "THIRD_PARTY.md"] {
+    @fs.write_bytes_to_file(root + "/" + name, @fs.read_file_to_bytes(name))
+  }
+  @fs.write_string_to_file(root + "/README.md",
+    "# MoonIce CLI 0.2.0\n\nRequires Node.js (validated with Node 24).\n\n```sh\nnode moonice.cjs --help\nnode moonice.cjs scan fixtures/deletes.icebundle.json\nnode moonice.cjs scan fixtures/partitioned.icebundle.json --filter-file fixtures/ts-ge-march.filter.json\n```\n\nExpected: two surviving rows in each scan. CLI decodes bounded offline standard-file bundles. No catalog or S3 network client. Apache-2.0.\n\nSource, API, compatibility and provenance: https://github.com/Ridge-Lab/moonice/tree/v0.2.0\n")
+  println("Staged CLI at " + root)
+}

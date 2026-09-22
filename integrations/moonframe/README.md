@@ -22,3 +22,12 @@ The adapter is specific to the fixture's `id` and `category` fields. It collects
 the visible rows for a DataFrame; it is not a streaming DataFrame adapter or
 a conversion for every Iceberg type. Example dependency:
 [MoonFrame 0.6.0](https://github.com/ihb2032/MoonFrame), Apache-2.0.
+
+## Backend boundary
+
+This combination is validated on **JS only**. MoonFrame resolves
+`moonbitlang/x@0.4.47`, while the standalone reader resolves 0.4.40. Combining
+0.4.47 with `mizchi/parquet@0.2.1` fails on Wasm because the latter's default
+filesystem wrapper calls `IOError.to_string`, removed in that newer x API.
+The separate MoonIce core passes all four backend jobs with its own dependency
+graph. Do not infer that every combination of downstream dependencies does too.

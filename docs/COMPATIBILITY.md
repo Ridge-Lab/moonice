@@ -26,6 +26,11 @@ MoonIce 0.2.0 is a bounded Iceberg v2 reader/inspector, not a complete standards
 | Batch delivery | `scan_batches` emits visible filtered rows, 1–100,000 per callback; arrays are owned and not reused; shared delete indexes; whole-file decoding remains |
 | Mutations | No table writes, transactions, snapshot expiration or object deletion |
 
+The standalone core is tested on JS/Wasm/Wasm GC/native. The optional MoonFrame
+consumer is **JS-only validated**: its newer x dependency conflicts with
+Parquet's default filesystem error interface on Wasm. See the
+[integration boundary](../integrations/moonframe/README.md#backend-boundary).
+
 Independent PyArrow fixtures verify NONE and Snappy compression with dictionary
 encoding, multiple row groups, nulls and exact Int64. Gzip and Zstd fixtures return
 `PARQUET_DECODE` with the offending path and an unsupported-codec explanation.

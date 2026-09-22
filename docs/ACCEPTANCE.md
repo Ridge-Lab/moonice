@@ -38,4 +38,8 @@
 
 ## 发布记录
 
-本地 45 项测试已分别通过 JS/Wasm/Wasm GC。四后端远端 CI、0.2.0 发布地址和独立下载验证结果将在发布完成后补入此处。
+- [CI 35725800115](https://github.com/Ridge-Lab/moonice/actions/runs/35725800115)：提交 `b3c399e` 的 JS、Wasm、Wasm GC、Linux native 四组检查/45 项测试/release 构建全部成功；CLI、两个库示例、JS MoonFrame 接入、网页构建与部署成功。
+- `moon publish` 返回 HTTP 200；[Mooncakes 0.2.0](https://mooncakes.io/docs/Ridge-Lab/moonice@0.2.0/) 已通过独立消费者实际下载验证。消费者只有版本依赖，没有本地 path/workspace 替换。
+- 注册表包的独立 JS MoonFrame 接入：物理 5 行、删除 3 行、DataFrame 2 行、合计 6，精确大整数检查通过；独立核心消费者的 Wasm 批次示例：两种规格、两批两行、合计 21。
+- 下游组合限制：MoonFrame 示例只验证 JS。它引入的 x 0.4.47 与 Parquet 0.2.1 的默认文件接口在 Wasm 下冲突，见[说明](../integrations/moonframe/README.md#backend-boundary)。这不影响核心自己的四后端 CI 结果。
+- [GitHub 0.2.0 发布页](https://github.com/Ridge-Lab/moonice/releases/tag/v0.2.0)提供源码、CLI、网页、模块归档与 SHA-256 校验文件。Mooncakes 模块归档保持发布时字节不变；发布后补充的证据和限制以本仓库文档为准。
