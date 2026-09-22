@@ -149,6 +149,11 @@ pub fn load_snapshot(
         }
         live_paths[entry.file.path] = true
         entries.push(entry)
+        if entries.length() > 1000000 {
+          raise Invalid(
+            "RESOURCE_LIMIT", "snapshot", "Snapshot exceeds one million live entries",
+          )
+        }
       }
     }
   }

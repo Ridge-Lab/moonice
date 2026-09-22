@@ -20,6 +20,7 @@ pub(all) struct ScanPlan {
 fn partition_exclusion(
   metadata : TableMetadata,
   entry : ManifestEntry,
+  schema : Schema,
   p : Predicate,
 ) -> String? {
   let spec = match
@@ -30,32 +31,27 @@ fn partition_exclusion(
   match p {
     All => None
     And(a, b) =>
-      match partition_exclusion(metadata, entry, a) {
+      match partition_exclusion(metadata, entry, schema, a) {
         Some(r) => Some(r)
-        None => partition_exclusion(metadata, entry, b)
+        None => partition_exclusion(metadata, entry, schema, b)
       }
     Or(a, b) =>
       match
         (
-          partition_exclusion(metadata, entry, a),
-          partition_exclusion(metadata, entry, b),
+          partition_exclusion(metadata, entry, schema, a),
+          partition_exclusion(metadata, entry, schema, b),
         ) {
-        (Some(_), Some(_)) =>
-          Some("Both OR branches exclude this identity partition")
+        (Some(_), Some(_)) => Some("Both OR branches exclude this partition")
         _ => None
       }
     Compare(id, _, _) | IsNull(id) | NotNull(id) => {
       for pf in spec.fields {
-        if pf.source_id == id && pf.transform == "identity" {
-          if entry.file.partition.get(pf.name) is Some(value) {
-            let comparable = match p {
-              Compare(_, _, literal) =>
-                value == Missing || scalar_compare(value, literal) is Some(_)
-              _ => true
-            }
-            if comparable && !p.matches(Map([(id, value)])) {
+        if pf.source_id == id {
+          if entry.file.partition.get(pf.name) is Some(value) &&
+            schema.field(id) is Some(field) {
+            if transformed_exclusion(field, pf.transform, value, p) {
               return Some(
-                "identity partition \{pf.name} cannot satisfy this predicate",
+                "\{pf.transform} partition \{pf.name} cannot satisfy this predicate",
               )
             }
           }
@@ -83,7 +79,8 @@ pub fn plan_scan(
     }
     let (code, explanation) = if entry.file.record_count == 0 {
       ("EMPTY_FILE", Some("File contains zero records"))
-    } else if partition_exclusion(metadata, entry, predicate) is Some(reason) {
+    } else if partition_exclusion(metadata, entry, state.schema, predicate)
+      is Some(reason) {
       ("PARTITION", Some(reason))
     } else {
       ("METRICS", metrics_exclusion(entry.file, state.schema, predicate))

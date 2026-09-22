@@ -2,3 +2,4 @@ pyiceberg[pyarrow,sql-sqlite]==0.12.0
 pyarrow==25.0.1
 fastavro==1.12.2
 fsspec==2026.7.0
+pyiceberg-core==0.10.1

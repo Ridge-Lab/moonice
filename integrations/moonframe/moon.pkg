@@ -1,0 +1,10 @@
+import {
+  "Ridge-Lab/moonice",
+  "ihb2032/MoonFrame/frame",
+  "ihb2032/MoonFrame/series",
+  "ihb2032/MoonFrame/types",
+  "moonbitlang/x/fs",
+  "moonbitlang/x/sys",
+}
+
+pkgtype(kind: "executable")

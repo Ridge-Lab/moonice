@@ -1,6 +1,6 @@
 ///|
 fn usage() -> Unit {
-  println("MoonIce 0.1.0 — Iceberg v2 snapshot inspector")
+  println("MoonIce 0.2.0 — Iceberg v2 snapshot inspector")
   println("moon run cmd/main --target js -- <action> <bundle> [options]")
   println("Actions: inspect, plan, scan, diff, check")
   println(

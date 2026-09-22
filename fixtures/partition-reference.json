@@ -1,0 +1,1208 @@
+[
+  {
+    "type": "int",
+    "transform": "bucket[1]",
+    "input": "-2147483648",
+    "expected": "0"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[16]",
+    "input": "-2147483648",
+    "expected": "8"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[97]",
+    "input": "-2147483648",
+    "expected": "95"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[1]",
+    "input": "-1001",
+    "expected": "0"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[16]",
+    "input": "-1001",
+    "expected": "4"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[97]",
+    "input": "-1001",
+    "expected": "50"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[1]",
+    "input": "-11",
+    "expected": "0"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[16]",
+    "input": "-11",
+    "expected": "7"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[97]",
+    "input": "-11",
+    "expected": "63"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[1]",
+    "input": "-1",
+    "expected": "0"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[16]",
+    "input": "-1",
+    "expected": "8"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[97]",
+    "input": "-1",
+    "expected": "85"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[1]",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[16]",
+    "input": "0",
+    "expected": "12"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[97]",
+    "input": "0",
+    "expected": "6"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[1]",
+    "input": "1",
+    "expected": "0"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[16]",
+    "input": "1",
+    "expected": "4"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[97]",
+    "input": "1",
+    "expected": "67"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[1]",
+    "input": "34",
+    "expected": "0"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[16]",
+    "input": "34",
+    "expected": "3"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[97]",
+    "input": "34",
+    "expected": "25"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[1]",
+    "input": "1001",
+    "expected": "0"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[16]",
+    "input": "1001",
+    "expected": "3"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[97]",
+    "input": "1001",
+    "expected": "12"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[1]",
+    "input": "2147483647",
+    "expected": "0"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[16]",
+    "input": "2147483647",
+    "expected": "14"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[97]",
+    "input": "2147483647",
+    "expected": "8"
+  },
+  {
+    "type": "int",
+    "transform": "bucket[1]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "int",
+    "transform": "bucket[16]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "int",
+    "transform": "bucket[97]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "long",
+    "transform": "bucket[16]",
+    "input": "-9223372036854775808",
+    "expected": "5"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[97]",
+    "input": "-9223372036854775808",
+    "expected": "20"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[16]",
+    "input": "-9007199254740993",
+    "expected": "10"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[97]",
+    "input": "-9007199254740993",
+    "expected": "32"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[16]",
+    "input": "-11",
+    "expected": "7"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[97]",
+    "input": "-11",
+    "expected": "63"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[16]",
+    "input": "-1",
+    "expected": "8"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[97]",
+    "input": "-1",
+    "expected": "85"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[16]",
+    "input": "0",
+    "expected": "12"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[97]",
+    "input": "0",
+    "expected": "6"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[16]",
+    "input": "1",
+    "expected": "4"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[97]",
+    "input": "1",
+    "expected": "67"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[16]",
+    "input": "34",
+    "expected": "3"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[97]",
+    "input": "34",
+    "expected": "25"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[16]",
+    "input": "9007199254740993",
+    "expected": "6"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[97]",
+    "input": "9007199254740993",
+    "expected": "38"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[16]",
+    "input": "9223372036854775807",
+    "expected": "15"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[97]",
+    "input": "9223372036854775807",
+    "expected": "46"
+  },
+  {
+    "type": "long",
+    "transform": "bucket[16]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "long",
+    "transform": "bucket[97]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "long",
+    "transform": "truncate[1]",
+    "input": "-1001",
+    "expected": "-1001"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[10]",
+    "input": "-1001",
+    "expected": "-1010"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[97]",
+    "input": "-1001",
+    "expected": "-1067"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[1]",
+    "input": "-11",
+    "expected": "-11"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[10]",
+    "input": "-11",
+    "expected": "-20"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[97]",
+    "input": "-11",
+    "expected": "-97"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[1]",
+    "input": "-1",
+    "expected": "-1"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[10]",
+    "input": "-1",
+    "expected": "-10"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[97]",
+    "input": "-1",
+    "expected": "-97"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[1]",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[10]",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[97]",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[1]",
+    "input": "1",
+    "expected": "1"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[10]",
+    "input": "1",
+    "expected": "0"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[97]",
+    "input": "1",
+    "expected": "0"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[1]",
+    "input": "34",
+    "expected": "34"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[10]",
+    "input": "34",
+    "expected": "30"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[97]",
+    "input": "34",
+    "expected": "0"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[1]",
+    "input": "1001",
+    "expected": "1001"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[10]",
+    "input": "1001",
+    "expected": "1000"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[97]",
+    "input": "1001",
+    "expected": "970"
+  },
+  {
+    "type": "long",
+    "transform": "truncate[1]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "long",
+    "transform": "truncate[10]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "long",
+    "transform": "truncate[97]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "string",
+    "transform": "bucket[16]",
+    "input": "",
+    "expected": "0"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[97]",
+    "input": "",
+    "expected": "0"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[1]",
+    "input": "",
+    "expected": ""
+  },
+  {
+    "type": "string",
+    "transform": "truncate[3]",
+    "input": "",
+    "expected": ""
+  },
+  {
+    "type": "string",
+    "transform": "bucket[16]",
+    "input": "a",
+    "expected": "2"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[97]",
+    "input": "a",
+    "expected": "58"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[1]",
+    "input": "a",
+    "expected": "a"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[3]",
+    "input": "a",
+    "expected": "a"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[16]",
+    "input": "ab",
+    "expected": "15"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[97]",
+    "input": "ab",
+    "expected": "23"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[1]",
+    "input": "ab",
+    "expected": "a"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[3]",
+    "input": "ab",
+    "expected": "ab"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[16]",
+    "input": "abc",
+    "expected": "10"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[97]",
+    "input": "abc",
+    "expected": "96"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[1]",
+    "input": "abc",
+    "expected": "a"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[3]",
+    "input": "abc",
+    "expected": "abc"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[16]",
+    "input": "abcd",
+    "expected": "10"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[97]",
+    "input": "abcd",
+    "expected": "27"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[1]",
+    "input": "abcd",
+    "expected": "a"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[3]",
+    "input": "abcd",
+    "expected": "abc"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[16]",
+    "input": "iceberg",
+    "expected": "9"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[97]",
+    "input": "iceberg",
+    "expected": "70"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[1]",
+    "input": "iceberg",
+    "expected": "i"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[3]",
+    "input": "iceberg",
+    "expected": "ice"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[16]",
+    "input": "北京😀abc",
+    "expected": "1"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[97]",
+    "input": "北京😀abc",
+    "expected": "91"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[1]",
+    "input": "北京😀abc",
+    "expected": "北"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[3]",
+    "input": "北京😀abc",
+    "expected": "北京😀"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[16]",
+    "input": "😀甲乙",
+    "expected": "12"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[97]",
+    "input": "😀甲乙",
+    "expected": "49"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[1]",
+    "input": "😀甲乙",
+    "expected": "😀"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[3]",
+    "input": "😀甲乙",
+    "expected": "😀甲乙"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[16]",
+    "input": "é́",
+    "expected": "6"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[97]",
+    "input": "é́",
+    "expected": "70"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[1]",
+    "input": "é́",
+    "expected": "é"
+  },
+  {
+    "type": "string",
+    "transform": "truncate[3]",
+    "input": "é́",
+    "expected": "é́"
+  },
+  {
+    "type": "string",
+    "transform": "bucket[16]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "string",
+    "transform": "bucket[97]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "string",
+    "transform": "truncate[1]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "string",
+    "transform": "truncate[3]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "date",
+    "transform": "year",
+    "input": "-25568",
+    "expected": "-71"
+  },
+  {
+    "type": "date",
+    "transform": "month",
+    "input": "-25568",
+    "expected": "-841"
+  },
+  {
+    "type": "date",
+    "transform": "day",
+    "input": "-25568",
+    "expected": "-25568"
+  },
+  {
+    "type": "date",
+    "transform": "bucket[16]",
+    "input": "-25568",
+    "expected": "13"
+  },
+  {
+    "type": "date",
+    "transform": "year",
+    "input": "-1",
+    "expected": "-1"
+  },
+  {
+    "type": "date",
+    "transform": "month",
+    "input": "-1",
+    "expected": "-1"
+  },
+  {
+    "type": "date",
+    "transform": "day",
+    "input": "-1",
+    "expected": "-1"
+  },
+  {
+    "type": "date",
+    "transform": "bucket[16]",
+    "input": "-1",
+    "expected": "8"
+  },
+  {
+    "type": "date",
+    "transform": "year",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "date",
+    "transform": "month",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "date",
+    "transform": "day",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "date",
+    "transform": "bucket[16]",
+    "input": "0",
+    "expected": "12"
+  },
+  {
+    "type": "date",
+    "transform": "year",
+    "input": "1",
+    "expected": "0"
+  },
+  {
+    "type": "date",
+    "transform": "month",
+    "input": "1",
+    "expected": "0"
+  },
+  {
+    "type": "date",
+    "transform": "day",
+    "input": "1",
+    "expected": "1"
+  },
+  {
+    "type": "date",
+    "transform": "bucket[16]",
+    "input": "1",
+    "expected": "4"
+  },
+  {
+    "type": "date",
+    "transform": "year",
+    "input": "10957",
+    "expected": "30"
+  },
+  {
+    "type": "date",
+    "transform": "month",
+    "input": "10957",
+    "expected": "360"
+  },
+  {
+    "type": "date",
+    "transform": "day",
+    "input": "10957",
+    "expected": "10957"
+  },
+  {
+    "type": "date",
+    "transform": "bucket[16]",
+    "input": "10957",
+    "expected": "5"
+  },
+  {
+    "type": "date",
+    "transform": "year",
+    "input": "11016",
+    "expected": "30"
+  },
+  {
+    "type": "date",
+    "transform": "month",
+    "input": "11016",
+    "expected": "361"
+  },
+  {
+    "type": "date",
+    "transform": "day",
+    "input": "11016",
+    "expected": "11016"
+  },
+  {
+    "type": "date",
+    "transform": "bucket[16]",
+    "input": "11016",
+    "expected": "13"
+  },
+  {
+    "type": "date",
+    "transform": "year",
+    "input": "47541",
+    "expected": "130"
+  },
+  {
+    "type": "date",
+    "transform": "month",
+    "input": "47541",
+    "expected": "1562"
+  },
+  {
+    "type": "date",
+    "transform": "day",
+    "input": "47541",
+    "expected": "47541"
+  },
+  {
+    "type": "date",
+    "transform": "bucket[16]",
+    "input": "47541",
+    "expected": "2"
+  },
+  {
+    "type": "date",
+    "transform": "year",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "date",
+    "transform": "month",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "date",
+    "transform": "day",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "date",
+    "transform": "bucket[16]",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": "-2208988800000000",
+    "expected": "-70"
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": "-2208988800000000",
+    "expected": "-840"
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": "-2208988800000000",
+    "expected": "-25567"
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": "-2208988800000000",
+    "expected": "-613608"
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": "-2208988800000000",
+    "expected": "9"
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": "-86400000001",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": "-86400000001",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": "-86400000001",
+    "expected": "-2"
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": "-86400000001",
+    "expected": "-25"
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": "-86400000001",
+    "expected": "14"
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": "-86400000000",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": "-86400000000",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": "-86400000000",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": "-86400000000",
+    "expected": "-24"
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": "-86400000000",
+    "expected": "15"
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": "-3600000001",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": "-3600000001",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": "-3600000001",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": "-3600000001",
+    "expected": "-2"
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": "-3600000001",
+    "expected": "7"
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": "-1",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": "-1",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": "-1",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": "-1",
+    "expected": "-1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": "-1",
+    "expected": "8"
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": "0",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": "0",
+    "expected": "12"
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": "1",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": "1",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": "1",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": "1",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": "1",
+    "expected": "4"
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": "3600000000",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": "3600000000",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": "3600000000",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": "3600000000",
+    "expected": "1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": "3600000000",
+    "expected": "0"
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": "951782400000000",
+    "expected": "30"
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": "951782400000000",
+    "expected": "361"
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": "951782400000000",
+    "expected": "11016"
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": "951782400000000",
+    "expected": "264384"
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": "951782400000000",
+    "expected": "5"
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": "4107542400000000",
+    "expected": "130"
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": "4107542400000000",
+    "expected": "1562"
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": "4107542400000000",
+    "expected": "47541"
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": "4107542400000000",
+    "expected": "1140984"
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": "4107542400000000",
+    "expected": "1"
+  },
+  {
+    "type": "timestamp",
+    "transform": "year",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "timestamp",
+    "transform": "month",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "timestamp",
+    "transform": "day",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "timestamp",
+    "transform": "hour",
+    "input": null,
+    "expected": null
+  },
+  {
+    "type": "timestamp",
+    "transform": "bucket[16]",
+    "input": null,
+    "expected": null
+  }
+]

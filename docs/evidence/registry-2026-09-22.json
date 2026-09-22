@@ -1,0 +1,162 @@
+{
+  "checked_on": "2026-09-22",
+  "source": "https://mooncakes.io/api/v0/modules",
+  "returned_modules": 2607,
+  "fields_searched": [
+    "name",
+    "description",
+    "keywords"
+  ],
+  "terms": [
+    "iceberg",
+    "lakehouse",
+    "data lake",
+    "data-lake",
+    "delta lake",
+    "delta-lake",
+    "hudi",
+    "paimon",
+    "parquet",
+    "avro",
+    "arrow",
+    "dataframe",
+    "duckdb"
+  ],
+  "matches": [
+    {
+      "name": "codeworm96/magpiedb",
+      "version": "0.2.0",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/codeworm96/magpiedb",
+      "keywords": [
+        "sql",
+        "database",
+        "json",
+        "csv",
+        "parquet"
+      ],
+      "description": "vibe coded lightweight OLAP database",
+      "is_new": false,
+      "created_at": "2026-04-20T06:57:07.939677"
+    },
+    {
+      "name": "f4ah6o/duckdb",
+      "version": "0.6.3",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/f4ah6o/duckdb.mbt",
+      "keywords": [
+        "duckdb"
+      ],
+      "description": "",
+      "is_new": false,
+      "created_at": "2026-04-18T13:03:30.270243"
+    },
+    {
+      "name": "ihb2032/MoonFrame",
+      "version": "0.6.0",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/ihb2032/MoonFrame",
+      "keywords": [
+        "dataframe",
+        "data-analysis",
+        "csv",
+        "tabular"
+      ],
+      "description": "A lightweight DataFrame and tabular-data library for MoonBit",
+      "is_new": false,
+      "created_at": "2026-07-31T02:14:29.277537"
+    },
+    {
+      "name": "mizchi/parquet",
+      "version": "0.2.1",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/mizchi/parquet",
+      "keywords": [
+        "moonbit",
+        "parquet"
+      ],
+      "description": "Parquet reader/writer for MoonBit.",
+      "is_new": false,
+      "created_at": "2026-04-25T11:15:48.797751"
+    },
+    {
+      "name": "Ridge-Lab/moonice",
+      "version": "0.1.0",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/Ridge-Lab/moonice",
+      "keywords": [
+        "iceberg",
+        "snapshot",
+        "data-lake",
+        "scan-planning"
+      ],
+      "description": "MoonBit-native Iceberg v2 snapshot diagnostics and explainable scan planning.",
+      "is_new": false,
+      "created_at": "2026-09-14T05:37:17.500032"
+    },
+    {
+      "name": "shunge/arrow",
+      "version": "0.1.0",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "MIT",
+      "repository": "https://github.com/buildliming/MoonArrow",
+      "keywords": [
+        "arrow",
+        "ipc",
+        "columnar",
+        "serialization"
+      ],
+      "description": "MoonArrow: pure MoonBit Arrow IPC stream and file reader/writer with checked metadata and PyArrow interoperability.",
+      "is_new": false,
+      "created_at": "2026-09-07T15:59:07.194934"
+    },
+    {
+      "name": "smallbearrr/pandas",
+      "version": "0.7.1",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/moonbit-community/pandas",
+      "keywords": [
+        "pandas",
+        "polars",
+        "dataframe",
+        "data cleaning",
+        "data manipulation"
+      ],
+      "description": "Provide efficient data manipulation and analysis",
+      "is_new": false,
+      "created_at": "2025-04-02T08:51:51.472189"
+    },
+    {
+      "name": "yugonlian/moon-avro",
+      "version": "0.3.0",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/yugonlian/moon-avro",
+      "keywords": [
+        "avro",
+        "serialization",
+        "ocf",
+        "codec",
+        "data"
+      ],
+      "description": "Pure MoonBit Apache Avro schema, datum codec, and Object Container File toolkit.",
+      "is_new": false,
+      "created_at": "2026-08-22T19:10:29.614458"
+    }
+  ],
+  "limits": "Metadata keyword search only; not a complete code similarity audit or proof that no substitute exists."
+}

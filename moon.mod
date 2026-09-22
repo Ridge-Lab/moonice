@@ -11,7 +11,7 @@
 
 name = "Ridge-Lab/moonice"
 
-version = "0.1.0"
+version = "0.2.0"
 
 readme = "README.md"
 
@@ -23,7 +23,7 @@ keywords = [ "iceberg", "snapshot", "data-lake", "scan-planning" ]
 
 preferred_target = "wasm"
 
-description = "MoonBit-native Iceberg v2 snapshot diagnostics and explainable scan planning."
+description = "MoonBit-native Iceberg v2 reading with partition evolution, delete semantics and explainable scan planning."
 
 import {
   "mizchi/parquet@0.2.1",

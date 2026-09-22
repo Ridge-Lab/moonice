@@ -163,7 +163,6 @@ function predicate() {
 const translations = {
   MAY_MATCH: "现有分区和统计值不足以排除此文件，保留并逐行过滤。",
   EMPTY_FILE: "文件记录数为 0。",
-  PARTITION: "identity 分区值不能满足当前条件。",
 };
 function reason(d) {
   return (
@@ -280,7 +279,7 @@ async function check() {
         .join("")
     : `<div class="finding"><strong>通过</strong><div>已检查 ${result.checked_snapshots} 个快照、${result.checked_objects} 个引用对象，未发现引用缺失或大小异常。</div></div>`;
 }
-async function load(text, name) {
+async function load(text, name, field) {
   source = text;
   selected = "";
   clearResults();
@@ -289,10 +288,11 @@ async function load(text, name) {
   $("source-name").textContent = name;
   timeline();
   await loadSchema();
+  if (field) $("field").value = field;
   await scan();
 }
 async function demo(name) {
-  const type = name === "deletes" ? "deletes" : "events";
+  const type = ["deletes", "partitioned"].includes(name) ? name : "events";
   const response = await fetch(`./${type}.icebundle.json`);
   if (!response.ok)
     throw {
@@ -309,8 +309,8 @@ async function demo(name) {
     delete b.files[latest.manifest_list];
     text = JSON.stringify(b);
   }
-  $("operator").value = name === "events" ? ">=" : "all";
-  $("literal").value = "10";
+  $("operator").value = ["events", "partitioned"].includes(name) ? ">=" : "all";
+  $("literal").value = name === "partitioned" ? "1709251200000000" : "10";
   document
     .querySelectorAll("[data-demo]")
     .forEach((x) => x.classList.toggle("active", x.dataset.demo === name));
@@ -320,7 +320,10 @@ async function demo(name) {
       ? "PyIceberg 真实生成 · 3 个快照"
       : name === "deletes"
         ? "标准 Avro / Parquet · 位置与等值删除"
-        : "故障注入 · 当前快照清单缺失",
+        : name === "partitioned"
+          ? "按天 → 按月分区 · ts 为 Unix 微秒 · 筛选 2024-03-01 及之后"
+          : "故障注入 · 当前快照清单缺失",
+    name === "partitioned" ? "ts" : "id",
   );
 }
 document

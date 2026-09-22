@@ -32,7 +32,11 @@ pub fn read_data_rows(Bytes, DataFile) -> Array[DataRow] raise IceError
 
 pub fn run_request(String, String) -> String
 
+pub fn scan_batches(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, (Array[DataRow]) -> Unit raise IceError, batch_size? : Int) -> ScanSummary raise IceError
+
 pub fn scan_rows(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, limit? : Int) -> ScanResult raise IceError
+
+pub fn transform_partition(Scalar, Json, String) -> Scalar?
 
 // Errors
 pub(all) suberror IceError {
@@ -49,6 +53,7 @@ pub fn Bundle::diagnose(Self) -> Diagnosis
 pub fn Bundle::load_snapshot(Self, snapshot_id? : Int64) -> SnapshotState raise IceError
 pub fn Bundle::read_file(Self, String) -> Bytes raise IceError
 pub fn Bundle::scan(Self, Predicate, snapshot_id? : Int64, limit? : Int) -> ScanResult raise IceError
+pub fn Bundle::scan_batches(Self, Predicate, (Array[DataRow]) -> Unit raise IceError, snapshot_id? : Int64, batch_size? : Int) -> ScanSummary raise IceError
 
 pub(all) enum CompareOp {
   Eq
@@ -185,6 +190,16 @@ pub(all) struct ScanResult {
   deleted_rows : Int
   matched_rows : Int
   truncated : Bool
+} derive(ToJson, @debug.Debug)
+
+pub(all) struct ScanSummary {
+  snapshot_id : Int64
+  schema : Schema
+  read_rows : Int
+  deleted_rows : Int
+  matched_rows : Int
+  scanned_files : Int
+  delete_files : Int
 } derive(ToJson, @debug.Debug)
 
 pub(all) struct Schema {

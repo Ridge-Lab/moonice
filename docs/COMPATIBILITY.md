@@ -1,6 +1,6 @@
 # Compatibility and boundaries
 
-MoonIce 0.1.0 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
+MoonIce 0.2.0 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
 
 | Surface | Current behavior |
 |---|---|
@@ -12,7 +12,8 @@ MoonIce 0.1.0 is a bounded Iceberg v2 reader/inspector, not a complete standards
 | File statistics | Integer/date/time/timestamp, string, boolean, binary and double bounds; float/unsupported bounds retain files |
 | Null / NaN | Null counts used conservatively; float/double bounds do not prune when NaN counts are unknown/nonzero; no NaN literal filters |
 | Predicates | Typed ID-bound comparisons, null checks, AND/OR; no SQL, NOT, IN or transforms in expressions |
-| Partition pruning | Identity only; unknown transforms retained; spec IDs and partition values used for deletes |
+| Partition pruning | identity, bucket[N] equality, truncate[W], year/month/day/hour; per-manifest spec IDs support partition evolution; void and unknown transforms retain files |
+| Transform types | int/long/string/binary bucket and truncate; date/time/timestamp bucket; date year/month/day, timestamp year/month/day/hour; decimal/UUID transforms unsupported; overflow retains files |
 | Position deletes | Reserved field IDs for path/position, exact path match, zero-based positions; data sequence ≤ delete sequence |
 | Equality deletes | Flat supported scalar keys including null; data sequence < delete sequence; same partition or global unpartitioned spec |
 | Parquet | Existing `mizchi/parquet` decoder plus MoonIce field-ID footer inspection; flat primitive schema, explicit positive IDs |
@@ -22,21 +23,38 @@ MoonIce 0.1.0 is a bounded Iceberg v2 reader/inspector, not a complete standards
 | Snapshot difference | Physical file additions/removals and schema changes; not logical row CDC |
 | Diagnostics | Bundle reference existence/size, incomplete traversal, unsupported format hints; not a complete file-integrity or table-consistency validator |
 | Storage | Caller-provided byte reader or explicit offline object map; no REST catalog, S3 client, remote auth or range reads |
+| Batch delivery | `scan_batches` emits visible filtered rows, 1–100,000 per callback; arrays are owned and not reused; shared delete indexes; whole-file decoding remains |
 | Mutations | No table writes, transactions, snapshot expiration or object deletion |
 
-The pinned Parquet decoder supports a subset of codecs and encodings. The frozen interoperability fixtures use uncompressed Parquet. Other codecs are delegated to that dependency and may return `PARQUET_DECODE`; they have not all been independently certified here.
+Independent PyArrow fixtures verify NONE and Snappy compression with dictionary
+encoding, multiple row groups, nulls and exact Int64. Gzip and Zstd fixtures return
+`PARQUET_DECODE` with the offending path and an unsupported-codec explanation.
+Other codecs/encodings are not certified; support is constrained by the pinned
+`mizchi/parquet@0.2.1` dependency. Snappy is also exercised by a real PyIceberg
+partition-evolution table.
+
+Time transforms use epoch microseconds (dates use epoch days), including negative
+values. String truncate counts Unicode code points, not UTF-16 code units.
+Inclusive transform projection retains the boundary partition and applies the
+original row predicate after decoding; missing metrics are not proof of exclusion.
 
 ## Resource limits
 
 - Offline bundle: at most 10,000 objects, 64 MiB per decoded object, 128 MiB decoded in total; JSON length also bounded.
-- Manifest OCF: 64 MiB input, 1 MiB header metadata, 8 MiB block bytes, 100,000 records per block, one million resulting entries.
+- Raw metadata: at most 8 MiB of string code units.
+- Manifest OCF: 64 MiB input, 1 MiB header metadata, 8 MiB block bytes, 100,000 records per block, one million resulting entries; one million live entries across a loaded snapshot.
 - Parquet: 64 MiB input, 8 MiB footer, 100,000 rows per file; compact footer depth 32 / nodes 100,000.
 - Scan: one million data rows and 100,000 distinct delete rows; output limit 0–100,000, default 1,000.
 - Predicate depth: 64.
 
 These guards limit ordinary oversized inputs; they are not a complete hostile-input sandbox. Underlying codecs allocate decoded structures, and compressed data can expand. Use trusted, bounded diagnostic samples; a production service needs stronger streaming, allocation and decompression budgets.
 
-The current scanner materializes files. It is intended for diagnostic samples and reference verification rather than warehouse-scale queries. Displayed skipped bytes are manifest file sizes, not measured network traffic or a claim of query speedup.
+The current scanner materializes files. Batch callbacks avoid a single combined
+result array but do not impose a decoder allocation budget. A callback error stops
+further scanning; batches already delivered remain visible if a later I/O error
+occurs. Consumers needing atomic output must stage it themselves. This reader is
+intended for bounded samples rather than warehouse-scale queries. Displayed skipped
+bytes are manifest file sizes, not measured traffic or a claim of speedup.
 
 ## Source references
 

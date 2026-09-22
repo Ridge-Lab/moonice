@@ -8,3 +8,4 @@ web/moonice.js
 web/*.icebundle.json
 web/LICENSE
 web/THIRD_PARTY.md
+integrations/moonframe/moon.work

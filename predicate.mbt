@@ -153,6 +153,13 @@ pub fn parse_predicate(
       text_value(json_field(j, "field"), "filter.field"),
     )
     let op = text_value(json_field(j, "op"), "filter.op")
+    let null_check = op == "is_null" || op == "not_null"
+    if obj.length() != (if null_check { 2 } else { 3 }) ||
+      obj.iter().any(pair => !["field", "op", "value"].contains(pair.0)) {
+      raise Invalid(
+        "INVALID_FILTER", "filter", "Unexpected or missing predicate fields",
+      )
+    }
     if op == "is_null" {
       return IsNull(f.id)
     }

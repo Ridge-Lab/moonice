@@ -5,7 +5,7 @@ fn main raise {
     "web/moonice.js",
     @fs.read_file_to_bytes("_build/js/release/build/bridge/bridge.js"),
   )
-  for name in ["events.icebundle.json", "deletes.icebundle.json"] {
+  for name in ["events.icebundle.json", "deletes.icebundle.json", "partitioned.icebundle.json"] {
     @fs.write_bytes_to_file(
       "web/" + name,
       @fs.read_file_to_bytes("fixtures/" + name),

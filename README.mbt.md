@@ -2,6 +2,41 @@
 
 For setup, supported formats and the interactive inspector, see [README.md](README.md).
 
+## Evaluate a partition transform
+
+```mbt check
+///|
+test "negative timestamps floor to the previous day and strings count code points" {
+  assert_eq(
+    @moonice.transform_partition(
+      @moonice.Integer(-1L),
+      Json::string("timestamp"),
+      "day",
+    ),
+    Some(@moonice.Integer(-1L)),
+  )
+  assert_eq(
+    @moonice.transform_partition(
+      @moonice.Text("月🌙冰"),
+      Json::string("string"),
+      "truncate[2]",
+    ),
+    Some(@moonice.Text("月🌙")),
+  )
+}
+```
+
+## Process bounded batches
+
+Run `moon run --target js examples/batch_read` from the repository root.
+The example reads an independently generated table whose partition specification
+changes from day to month, filters epoch microseconds, and sums IDs without
+collecting a complete result array. Expected: two batches, two rows, sum 21.
+`scan_batches` applies deletes and residual filters before invoking the callback;
+arrays are not reused. A later error can follow already delivered batches, so
+atomic consumers must stage their output. Individual Parquet files still decode
+in memory. See [compatibility limits](docs/COMPATIBILITY.md).
+
 ## Bind predicates to stable field IDs
 
 ```mbt check

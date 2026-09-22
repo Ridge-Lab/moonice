@@ -21,13 +21,29 @@ jobs:
       - run: moon version --all
       - run: moon update
       - run: moon check --target ${{ matrix.target }} --deny-warn
-      - run: moon test --target ${{ matrix.target }}
+      - run: moon test --target ${{ matrix.target }} --deny-warn
       - run: moon build --target ${{ matrix.target }} --release
       - name: Exercise CLI entry point
         if: matrix.target == 'js' || matrix.target == 'native'
         run: moon run --target ${{ matrix.target }} cmd/main -- scan fixtures/deletes.icebundle.json --limit 1
       - name: Exercise public library integration
         run: moon run --target ${{ matrix.target }} examples/library_read
+      - name: Exercise batch reader and partition evolution
+        run: moon run --target ${{ matrix.target }} examples/batch_read
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hustcer/setup-moonbit@v1.22
+        with:
+          version: "0.10.8+8606a5800"
+          core-version: "0.10.8+8606a5800"
+      - run: moon update
+      - name: Test current source with MoonFrame
+        working-directory: integrations/moonframe
+        run: |
+          moon work init . ../..
+          moon run --target js .
   web:
     runs-on: ubuntu-latest
     steps:
@@ -48,7 +64,7 @@ jobs:
           path: web/
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: [test, web]
+    needs: [test, integration, web]
     runs-on: ubuntu-latest
     permissions:
       pages: write

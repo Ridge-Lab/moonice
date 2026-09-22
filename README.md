@@ -4,7 +4,7 @@
 
 从标准 `metadata.json → manifest list → manifest → Parquet` 追踪一次读取：哪些文件参与扫描、哪些被排除、为什么删除文件会影响某些数据、字段改名后旧文件如何读取。核心表语义使用 MoonBit 实现；命令行和浏览器工作台共用同一套 API。
 
-这是可运行的 **0.1.0 有界实现**。支持范围见 [兼容性说明](docs/COMPATIBILITY.md)，不代表完整 Iceberg 引擎或生产级数据湖服务。
+这是可运行的 **0.2.0 有界实现**。支持范围见 [兼容性说明](docs/COMPATIBILITY.md)，不代表完整 Iceberg 引擎或生产级数据湖服务。
 
 [在线体验](https://ridge-lab.github.io/moonice/) · [构建与测试记录](https://github.com/Ridge-Lab/moonice/actions/workflows/ci.yml) · [API 示例](README.mbt.md)
 
@@ -19,6 +19,8 @@ moon run --target js examples/library_read
 ```
 
 [示例源码](examples/library_read/main.mbt)直接调用公共库 API。CLI、网页和这个示例是同一项目的不同入口，不是外部采用案例。
+
+0.2.0 增加常用分区变换与分区演进、批量结果回调和共享删除索引。[MoonFrame 接入示例](integrations/moonframe/)把删除后的两条有效记录转为 typed Series，再由 MoonFrame 聚合得到 `id_sum=6`；超过 JavaScript 安全整数范围的值通过 Int64 传递。这个示例验证两套生态库可以组合使用，没有宣称 MoonFrame 作者已采用本项目。
 
 这层 API 面向需要在 MoonBit 中编写数据读取器、诊断工具和兼容性检查的开发者。已有 [DuckDB 绑定](https://github.com/f4ah6o/duckdb.mbt)也是实际的替代路径，普通 SQL 查询可以优先评估它。MoonIce 的取舍是让表语义和中间决策可在 MoonBit 内直接组合，核心能编译到 JS、Wasm、Wasm GC 和 native；目前读取范围比完整查询引擎窄，尚未证明性能或生产适用性优于现有引擎。
 
@@ -46,7 +48,7 @@ npm run build
 python -m http.server 8765 --bind 127.0.0.1 --directory web
 ```
 
-打开 <http://127.0.0.1:8765>。页面提供订单演进、删除语义、缺失清单三个演示，也支持导入自己的离线数据包。没有服务器端数据处理或上传接口。扫描在 Web Worker 内运行。
+打开 <http://127.0.0.1:8765>。页面提供订单演进、删除语义、分区演进、缺失清单四个演示，也支持导入自己的离线数据包。没有服务器端数据处理或上传接口。扫描在 Web Worker 内运行。
 
 ## 可复现的使用场景
 
@@ -54,6 +56,7 @@ python -m http.server 8765 --bind 127.0.0.1 --directory web
 2. **核对删除后的结果。** 打开“删除语义”：旧文件 4 行、新文件 1 行。位置删除移除旧文件第 0 行，等值删除匹配 `category=b` 和空值。新文件与等值删除处于同一数据序列，因此其 `id=2` 保留；最终剩 2 行。界面逐对解释删除关联。
 3. **排查不完整的快照导出。** 打开“缺失文件”，模拟当前快照清单遗失。扫描返回带对象路径的 `MISSING_FILE`；诊断继续检查其他快照，且不会在引用遍历不完整时把未知对象当作可安全清理的文件。
 4. **核对字段演进与重写。** 在订单第一代与当前快照之间切换：`city` 改名为 `region`，字段 ID 仍为 2；新字段 `note` 在旧文件中补空值。快照差异展示物理文件的替换，区分重写文件数量和逻辑数据变化。
+5. **接入分析流水线。** “分区演进”样本含两代快照和六份 Snappy Parquet 文件，分区由 `day(ts)` 改为 `month(ts)`。筛选 2024-03-01 起的数据时，按各文件自己的规格裁剪到两份文件。运行 `moon run --target js examples/batch_read`，逐批处理两行并得到 ID 合计 21；调用方不必收集完整结果数组。仍按整文件解码，内存限制见兼容性说明。
 
 ## 命令行
 
@@ -102,7 +105,8 @@ moon run --target js cmd/main -- check table.icebundle.json
 | `metadata.mbt`, `types.mbt` | 精确整数、schema、快照与引用校验 |
 | `manifests.mbt`, `bundle.mbt` | Avro 互操作、继承序列号、加载有效文件 |
 | `predicate.mbt`, `metrics.mbt`, `planner.mbt` | 字段 ID 绑定、保守裁剪、解释依据 |
-| `deletes.mbt`, `scanner.mbt` | 删除适用性、位置和等值删除、残余过滤 |
+| `partition.mbt` | bucket、truncate、year/month/day/hour 变换与包含边界的裁剪 |
+| `deletes.mbt`, `delete_index.mbt`, `scanner.mbt`, `batches.mbt` | 删除适用性、共享索引、残余过滤、逐批交付 |
 | `parquet_ids.mbt`, `rows.mbt` | 读取 Parquet 字段 ID、稳定投影 |
 | `diagnostics.mbt` | 引用诊断、物理快照差异 |
 | `request.mbt`, `bridge/`, `cmd/main/`, `web/` | 共用 JSON 接口、CLI 与网页 |
@@ -111,12 +115,13 @@ Avro 与 Parquet 的底层解码复用现有 MoonBit 生态库；MoonIce 提供�
 
 ## 验证
 
-仓库包含 PyIceberg 实际生成的三代快照、六组独立扫描参考结果，以及使用 fastavro/PyArrow 写出的删除语义数据。等值删除用规范推导的明确预期值验证；没有声称 PyIceberg 执行了等值删除。
+仓库包含 PyIceberg 实际生成的三代快照和六组扫描参考结果，另有分区演进表的四组参考结果、201 组分区变换对照值，以及 fastavro/PyArrow 写出的删除语义数据。等值删除用规范推导的明确预期值验证；没有声称 PyIceberg 执行了等值删除。NONE/Snappy、字典编码、多 row group 和空值已由独立生成的 Parquet 样本验证；Gzip/Zstd 明确报不支持。
 
 ```sh
 python -m pip install -r tools/requirements-reference.txt
 python tools/reference.py fixtures
 python tools/delete_reference.py
+python tools/extended_reference.py fixtures
 moon test --target wasm
 moon test --target js
 ```

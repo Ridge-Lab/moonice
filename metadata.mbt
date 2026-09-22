@@ -2,6 +2,11 @@
 /// Parse v2 table metadata without I/O. Malformed input and other format versions
 /// are rejected; missing historical parents are allowed because snapshots expire.
 pub fn parse_metadata(source : String) -> TableMetadata raise IceError {
+  if source.length() > 8 * 1024 * 1024 {
+    raise Invalid(
+      "RESOURCE_LIMIT", "metadata", "Metadata exceeds 8 MiB of code units",
+    )
+  }
   let root = @json.parse(source) catch {
     _ => raise Invalid("INVALID_JSON", "$", "Metadata is not valid JSON")
   }
@@ -180,6 +185,11 @@ fn parse_snapshot(j : Json) -> Snapshot raise IceError {
 fn validate_metadata(table : TableMetadata) -> Unit raise IceError {
   let schemas : Map[Int, Bool] = Map([])
   for s in table.schemas {
+    if s.id < 0 {
+      raise Invalid(
+        "INVALID_SCHEMA", "schemas", "Schema IDs must be nonnegative",
+      )
+    }
     if schemas.contains(s.id) {
       raise Invalid("DUPLICATE_SCHEMA", "schemas", "Duplicate schema ID")
     }
@@ -192,6 +202,27 @@ fn validate_metadata(table : TableMetadata) -> Unit raise IceError {
   }
   let specs : Map[Int, Bool] = Map([])
   for s in table.partition_specs {
+    if s.id < 0 {
+      raise Invalid(
+        "INVALID_SPEC", "partition-specs", "Spec IDs must be nonnegative",
+      )
+    }
+    let field_ids : Map[Int, Bool] = Map([])
+    let names : Map[String, Bool] = Map([])
+    for field in s.fields {
+      if field.source_id <= 0 ||
+        field.field_id <= 0 ||
+        field.name.is_empty() ||
+        field.transform.is_empty() ||
+        field_ids.contains(field.field_id) ||
+        names.contains(field.name) {
+        raise Invalid(
+          "INVALID_SPEC", "partition-specs", "Invalid or duplicate partition field",
+        )
+      }
+      field_ids[field.field_id] = true
+      names[field.name] = true
+    }
     if specs.contains(s.id) {
       raise Invalid(
         "DUPLICATE_SPEC", "partition-specs", "Duplicate partition spec ID",

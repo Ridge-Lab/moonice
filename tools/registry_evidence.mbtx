@@ -1,0 +1,30 @@
+import { "moonbitlang/x/fs", "moonbitlang/core/json" }
+
+// Run from the repository root after downloading the public registry response.
+// This filters metadata only; it does not assert source-code uniqueness.
+fn main raise {
+  let source = @json.parse(@fs.read_file_to_string("_build/registry-2026-09-22.json"))
+  guard source is Array(modules) else { abort("Expected registry array") }
+  let terms = ["iceberg", "lakehouse", "data lake", "data-lake", "delta lake",
+    "delta-lake", "hudi", "paimon", "parquet", "avro", "arrow", "dataframe", "duckdb"]
+  let matches = modules.filter(item => {
+    guard item is Object(fields) else { return false }
+    let fields = ["name", "description", "keywords"].map(k => fields.get(k).unwrap_or(Json::null()))
+    let text = Json::array(fields).stringify().to_lower()
+    terms.any(t => text.contains(t))
+  })
+  let evidence : Json = {
+    "checked_on": "2026-09-22",
+    "source": "https://mooncakes.io/api/v0/modules",
+    "returned_modules": modules.length(),
+    "fields_searched": ["name", "description", "keywords"],
+    "terms": terms.to_json(),
+    "matches": matches.to_json(),
+    "limits": "Metadata keyword search only; not a complete code similarity audit or proof that no substitute exists.",
+  }
+  @fs.write_string_to_file("docs/evidence/registry-2026-09-22.json", evidence.stringify(indent=2))
+  println("modules=\{modules.length()} matches=\{matches.length()}")
+  for item in matches {
+    if item is Object(fields) { println(fields.get("name").unwrap_or(Json::null()).stringify()) }
+  }
+}
