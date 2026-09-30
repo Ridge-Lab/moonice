@@ -11,6 +11,11 @@ compiler and dependency compatibility.
   and exercises the MoonFrame consumer on the same four targets.
 - README includes versioned clone, library installation and reproducible samples.
 
+All four core targets passed 45 tests each, and all four MoonFrame integration
+jobs passed [CI](https://github.com/Ridge-Lab/moonice/actions/runs/36724785284).
+The published Mooncakes package also passed a registry-only consumer check on
+JS, Wasm and Wasm GC. The deployed workbench's four sample flows were exercised.
+
 Install with `moon add Ridge-Lab/moonice@0.2.1`. See
 [verification](ACCEPTANCE.md), [compatibility](COMPATIBILITY.md) and
 [provenance](PROVENANCE.md) for actual results and supported scope.

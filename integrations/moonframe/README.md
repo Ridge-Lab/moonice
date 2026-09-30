@@ -27,9 +27,10 @@ a conversion for every Iceberg type. Example dependency:
 
 MoonIce 0.2.1 uses `mizchi/parquet@0.2.2` and `moonbitlang/x@0.5.5`, with
 `moonc v0.10.14+7d59c7ec9`. This resolves the earlier filesystem error-interface
-conflict. The example runs on JS, Wasm and Wasm GC locally; CI also checks Linux
-native. See the [version verification record](../../docs/ACCEPTANCE.md) for
-completed results. Other compiler/dependency combinations are not implied.
+conflict. The example passes on JS, Wasm, Wasm GC and Linux native in CI, and
+on JS/Wasm/Wasm GC in a separate registry-only consumer. See the
+[version verification record](../../docs/ACCEPTANCE.md) for completed results.
+Other compiler/dependency combinations are not implied.
 
 Normal use resolves MoonIce from Mooncakes. To test unpublished local changes,
 run `moon work init . ../..` in this directory; remove that generated `moon.work`

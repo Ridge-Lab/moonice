@@ -45,4 +45,8 @@ native 需要 C 编译器；Linux CI 安装环境可见 workflow。库示例预�
 
 ## 发布验证
 
-本次本地已完成四后端静态检查，JS/Wasm/Wasm GC 各 45 项测试及三后端 MoonFrame 接入。完整 CI 和注册表分发结果将在发布完成后补记于此，历史 0.2.0 的结果不替代本次验证。
+- [CI 36724785284](https://github.com/Ridge-Lab/moonice/actions/runs/36724785284)：提交 `8a06849`，moonc `0.10.14+7d59c7ec9`；JS、Wasm、Wasm GC、Linux native 各通过 45 项测试，格式、检查、release 构建、CLI 和库示例通过。四组 MoonFrame 接入、网页构建及部署全部成功。
+- `moon publish` 对生成的归档解压检查通过后返回 `200 OK`。[Mooncakes 0.2.1](https://mooncakes.io/docs/Ridge-Lab/moonice@0.2.1/) 已发布。
+- 独立消费者仅声明 Mooncakes 版本依赖，没有 path/workspace 替换。实际解析到 MoonIce 0.2.1、Parquet 0.2.2、x 0.5.5：JS/Wasm/Wasm GC 的 MoonFrame 示例均返回两行、合计 6，精确 Int64 和空值断言通过；Wasm 批次示例返回两批两行、合计 21；JS 库读取示例返回物理 5 行、删除 3 行、可见 2 行。
+- 已检查部署后的 0.2.1 工作台：订单筛选得到 ID 10、11；删除样本得到 ID 4、2；分区样本保留 2 份、裁剪 4 份文件并返回 2 行；缺失文件样本返回完整 `MISSING_FILE` 路径，清除旧行结果和统计值。
+- 独立 Node.js CLI 使用 `.mjs`，支持新版 x 生成的 ES Module；已运行帮助和删除样本。发布资产、源码及 SHA-256 校验见 [GitHub Release](https://github.com/Ridge-Lab/moonice/releases/tag/v0.2.1)。Mooncakes 模块归档保持首次发布字节；发布后补充的验证记录以本仓库文档为准。
