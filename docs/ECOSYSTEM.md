@@ -56,8 +56,8 @@ visible_rows=2
 创建普通 MoonBit 项目，执行：
 
 ```sh
-moon add Ridge-Lab/moonice@0.2.0
-moon add moonbitlang/x@0.4.40
+moon add Ridge-Lab/moonice@0.2.1
+moon add moonbitlang/x@0.5.5
 ```
 
 将本仓库 `examples/library_read/main.mbt` 与 `moon.pkg` 放入该项目的 `main/`，将删除样本放入其 `fixtures/deletes.icebundle.json`，在新项目根目录运行：

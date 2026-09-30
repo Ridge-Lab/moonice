@@ -114,7 +114,7 @@ pub fn Bundle::diagnose(self : Bundle) -> Diagnosis {
       }
     }
   }
-  { checked_snapshots, checked_objects: objects.length(), findings }
+  { checked_snapshots, checked_objects: objects.length(), findings, }
 }
 
 ///|

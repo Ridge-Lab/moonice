@@ -131,7 +131,7 @@ fn parse_schema(j : Json) -> Schema raise IceError {
     ids[f.id] = true
     names[f.name] = true
   }
-  { id, fields }
+  { id, fields, }
 }
 
 ///|

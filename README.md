@@ -4,7 +4,7 @@
 
 从标准 `metadata.json → manifest list → manifest → Parquet` 追踪一次读取：哪些文件参与扫描、哪些被排除、为什么删除文件会影响某些数据、字段改名后旧文件如何读取。核心表语义使用 MoonBit 实现；命令行和浏览器工作台共用同一套 API。
 
-这是可运行的 **0.2.0 有界实现**。支持范围见 [兼容性说明](docs/COMPATIBILITY.md)，不代表完整 Iceberg 引擎或生产级数据湖服务。
+这是可运行的 **0.2.1 有界实现**，使用 MoonBit 0.10.14。支持范围见 [兼容性说明](docs/COMPATIBILITY.md)，不代表完整 Iceberg 引擎或生产级数据湖服务。
 
 [在线体验](https://ridge-lab.github.io/moonice/) · [构建与测试记录](https://github.com/Ridge-Lab/moonice/actions/workflows/ci.yml) · [API 示例](README.mbt.md)
 
@@ -28,18 +28,31 @@ moon run --target js examples/library_read
 
 ## 五分钟运行
 
-需要 MoonBit（本地验证：`moonc v0.10.8+8606a5800`）、Node.js。Python 仅用于可选的参考数据生成和本地静态文件服务。
+先按 [MoonBit 安装说明](https://docs.moonbitlang.com/en/latest/quickstart.html)安装工具链。最低要求为 **moonc 0.10.14**；本版本与 CI 固定验证 `moonc v0.10.14+7d59c7ec9`（对应 core 同版本）。使用其他更新版本时，请先运行完整检查。JS 示例需要 Node.js（验证版本 24），native 需要 C 编译器；Python 仅用于可选的参考数据生成和本地静态文件服务。
+
+在现有 MoonBit 项目中安装库：
 
 ```sh
 moon update
+moon add Ridge-Lab/moonice@0.2.1
+```
+
+在调用方 `moon.pkg` 中加入 `import { "Ridge-Lab/moonice" @ice }`，使用[可执行 API 示例](README.mbt.md)。运行本仓库的完整示例：
+
+```sh
+git clone --branch v0.2.1 https://github.com/Ridge-Lab/moonice.git
+cd moonice
+moon version --all
+moon update
 moon check --target all --deny-warn
+moon build --target all --release
 moon test --target wasm
 moon test --target js
 moon test --target wasm-gc
 moon run --target js cmd/main -- scan fixtures/events.icebundle.json --filter-file fixtures/id-ge-10.filter.json
 ```
 
-最后一条命令返回 `id=10,11`，并说明另一个数据文件为什么被上界统计排除。所有 64 位整数在 JSON 输出中使用十进制字符串。
+最后一条命令返回 `id=10,11`，并说明另一个数据文件为什么被上界统计排除。所有 64 位整数在 JSON 输出中使用十进制字符串。Linux CI 还运行 `moon test --target native --deny-warn`，并在四个后端运行两个库示例和 MoonFrame 接入。完整证据见[版本验证记录](docs/ACCEPTANCE.md)。
 
 启动浏览器工作台：
 

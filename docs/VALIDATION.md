@@ -1,5 +1,23 @@
 # Validation record
 
+## 0.2.1 — 2026-09-30
+
+Compiler: `moonc v0.10.14+7d59c7ec9`; moon: `0.1.20260920`.
+Parquet 0.2.2 and x 0.5.5 are resolved from Mooncakes, without cache patches.
+
+- All-target checking with `--deny-warn` passes.
+- JS, Wasm and Wasm GC each pass all 45 tests, including the executable API
+  documentation and the frozen independent Avro/Parquet/partition fixtures.
+- The same local-source MoonFrame example runs on all three targets with
+  5 physical rows, 3 removed rows, 2 visible rows and ID sum 6; its exact Int64
+  and null assertions pass. This supersedes the 0.2.0 Wasm limitation below.
+- Generated interfaces expose the formerly implicit trait methods explicitly;
+  no existing scan, planning or decoding signature was removed.
+
+CI, released-package and deployment results are recorded in the current
+[version verification record](ACCEPTANCE.md). Historical records below refer
+to their original toolchains and dependency graphs.
+
 ## 0.2.0 — 2026-09-22
 
 - Locally passed **45 tests on each of JS, Wasm and Wasm GC**, with `--deny-warn`;

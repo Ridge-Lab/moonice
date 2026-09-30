@@ -23,7 +23,7 @@ test "no false pruning for exhaustive integer intervals and comparisons" {
   let schema : Schema = {
     id: 0,
     fields: [
-      { id: 1, name: "x", required: false, field_type: Json::string("long") },
+      { id: 1, name: "x", required: false, field_type: Json::string("long"), },
     ],
   }
   for lo in -5..<6 {
@@ -48,7 +48,7 @@ test "unknown malformed and inverted bounds retain files" {
   let schema : Schema = {
     id: 0,
     fields: [
-      { id: 1, name: "x", required: false, field_type: Json::string("long") },
+      { id: 1, name: "x", required: false, field_type: Json::string("long"), },
     ],
   }
   let p = Compare(1, Eq, Integer(5L))

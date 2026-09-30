@@ -1,6 +1,6 @@
 # Compatibility and boundaries
 
-MoonIce 0.2.0 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
+MoonIce 0.2.1 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
 
 | Surface | Current behavior |
 |---|---|
@@ -26,16 +26,16 @@ MoonIce 0.2.0 is a bounded Iceberg v2 reader/inspector, not a complete standards
 | Batch delivery | `scan_batches` emits visible filtered rows, 1–100,000 per callback; arrays are owned and not reused; shared delete indexes; whole-file decoding remains |
 | Mutations | No table writes, transactions, snapshot expiration or object deletion |
 
-The standalone core is tested on JS/Wasm/Wasm GC/native. The optional MoonFrame
-consumer is **JS-only validated**: its newer x dependency conflicts with
-Parquet's default filesystem error interface on Wasm. See the
-[integration boundary](../integrations/moonframe/README.md#backend-boundary).
+The core and optional MoonFrame consumer use the same pinned toolchain and
+dependency versions. Their JS/Wasm/Wasm GC/native jobs are defined in CI; actual
+results are recorded in [validation](ACCEPTANCE.md). The Parquet 0.2.2 and x 0.5.5
+upgrade resolves the filesystem interface conflict documented for 0.2.0.
 
 Independent PyArrow fixtures verify NONE and Snappy compression with dictionary
 encoding, multiple row groups, nulls and exact Int64. Gzip and Zstd fixtures return
 `PARQUET_DECODE` with the offending path and an unsupported-codec explanation.
 Other codecs/encodings are not certified; support is constrained by the pinned
-`mizchi/parquet@0.2.1` dependency. Snappy is also exercised by a real PyIceberg
+`mizchi/parquet@0.2.2` dependency. Snappy is also exercised by a real PyIceberg
 partition-evolution table.
 
 Time transforms use epoch microseconds (dates use epoch days), including negative

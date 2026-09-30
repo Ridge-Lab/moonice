@@ -14,10 +14,10 @@ the implementation.
 
 - `yugonlian/moon-avro@0.3.0`, Apache-2.0: Avro binary and OCF decoding.
   <https://github.com/yugonlian/moon-avro>
-- `mizchi/parquet@0.2.1`, Apache-2.0: Parquet data-page decoding.
+- `mizchi/parquet@0.2.2`, Apache-2.0: Parquet data-page decoding.
   <https://github.com/mizchi/parquet>
 - MoonBit standard library, Apache-2.0.
-- `moonbitlang/x@0.4.40`, Apache-2.0: CLI filesystem and process support.
+- `moonbitlang/x@0.5.5`, Apache-2.0: CLI filesystem and process support.
 
 These remain dependencies, rather than being presented as MoonIce implementation
 work. Their transitive dependencies and licenses remain applicable.

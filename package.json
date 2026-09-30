@@ -1,7 +1,8 @@
 {
   "name": "moonice-workbench",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
+  "type": "module",
   "description": "Local build commands for the MoonBit MoonIce inspector",
   "scripts": {
     "build": "moon build --release --target js && moon run tools/prepare_web.mbtx",

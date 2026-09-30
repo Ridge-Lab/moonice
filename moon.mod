@@ -11,7 +11,7 @@
 
 name = "Ridge-Lab/moonice"
 
-version = "0.2.0"
+version = "0.2.1"
 
 readme = "README.md"
 
@@ -26,7 +26,7 @@ preferred_target = "wasm"
 description = "MoonBit-native Iceberg v2 reading with partition evolution, delete semantics and explainable scan planning."
 
 import {
-  "mizchi/parquet@0.2.1",
+  "mizchi/parquet@0.2.2",
   "yugonlian/moon-avro@0.3.0",
-  "moonbitlang/x@0.4.40",
+  "moonbitlang/x@0.5.5",
 }

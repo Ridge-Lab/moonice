@@ -25,9 +25,12 @@ a conversion for every Iceberg type. Example dependency:
 
 ## Backend boundary
 
-This combination is validated on **JS only**. MoonFrame resolves
-`moonbitlang/x@0.4.47`, while the standalone reader resolves 0.4.40. Combining
-0.4.47 with `mizchi/parquet@0.2.1` fails on Wasm because the latter's default
-filesystem wrapper calls `IOError.to_string`, removed in that newer x API.
-The separate MoonIce core passes all four backend jobs with its own dependency
-graph. Do not infer that every combination of downstream dependencies does too.
+MoonIce 0.2.1 uses `mizchi/parquet@0.2.2` and `moonbitlang/x@0.5.5`, with
+`moonc v0.10.14+7d59c7ec9`. This resolves the earlier filesystem error-interface
+conflict. The example runs on JS, Wasm and Wasm GC locally; CI also checks Linux
+native. See the [version verification record](../../docs/ACCEPTANCE.md) for
+completed results. Other compiler/dependency combinations are not implied.
+
+Normal use resolves MoonIce from Mooncakes. To test unpublished local changes,
+run `moon work init . ../..` in this directory; remove that generated `moon.work`
+before testing the published package. CI explicitly uses the source workspace.

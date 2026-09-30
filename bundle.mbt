@@ -55,7 +55,7 @@ pub fn open_bundle(source : String) -> Bundle raise IceError {
     }
     files[path] = bytes
   }
-  { metadata, files }
+  { metadata, files, }
 }
 
 ///|
@@ -157,7 +157,7 @@ pub fn load_snapshot(
       }
     }
   }
-  { snapshot, schema, manifests, entries }
+  { snapshot, schema, manifests, entries, }
 }
 
 ///|

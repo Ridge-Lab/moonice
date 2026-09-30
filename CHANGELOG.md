@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.1 — 2026-09-30
+
+- Raised the supported toolchain floor to moonc 0.10.14 and pinned CI/compiler
+  core to `0.10.14+7d59c7ec9`.
+- Imported the Avro OCF package directly; the unused Avro JSON facade calls an
+  API removed from the new standard library. No dependency source is patched.
+- Explicitly exposed derived trait methods under the new compiler rules,
+  preserving the previous public method-call API without suppressing warnings.
+- Upgraded Parquet to 0.2.2 and x to 0.5.5; expanded the MoonFrame integration
+  CI to JS, Wasm, Wasm GC and native after resolving the old dependency conflict.
+- Added clone/install instructions and refreshed release verification records.
+
+The supported Iceberg feature set is unchanged from 0.2.0.
+
 ## 0.2.0 — 2026-09-22
 
 - Added per-spec partition projection for bucket, truncate, year, month, day and

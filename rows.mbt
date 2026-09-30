@@ -65,7 +65,7 @@ pub fn read_data_rows(
     for column, value in row {
       values[ids[column]] = parquet_scalar(value)
     }
-    { file_path: file.path, position: i.to_int64(), values }
+    { file_path: file.path, position: i.to_int64(), values, }
   })
 }
 

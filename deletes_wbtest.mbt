@@ -9,7 +9,7 @@ fn delete_test_metadata() -> TableMetadata {
     current_snapshot_id: None,
     schemas: [],
     partition_specs: [
-      { id: 0, fields: [] },
+      { id: 0, fields: [], },
       {
         id: 1,
         fields: [
