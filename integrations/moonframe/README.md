@@ -21,16 +21,17 @@ checks `9007199254740993` survives unchanged.
 The adapter is specific to the fixture's `id` and `category` fields. It collects
 the visible rows for a DataFrame; it is not a streaming DataFrame adapter or
 a conversion for every Iceberg type. Example dependency:
-[MoonFrame 0.6.0](https://github.com/ihb2032/MoonFrame), Apache-2.0.
+[MoonFrame 0.8.0](https://github.com/ihb2032/MoonFrame), Apache-2.0.
 
 ## Backend boundary
 
-MoonIce 0.2.1 uses `mizchi/parquet@0.2.2` and `moonbitlang/x@0.5.5`, with
-`moonc v0.10.14+7d59c7ec9`. This resolves the earlier filesystem error-interface
-conflict. The example passes on JS, Wasm, Wasm GC and Linux native in CI, and
-on JS/Wasm/Wasm GC in a separate registry-only consumer. See the
-[version verification record](../../docs/ACCEPTANCE.md) for completed results.
-Other compiler/dependency combinations are not implied.
+MoonIce 0.3.0 uses `mizchi/parquet@0.2.2`, `moonbitlang/x@0.5.7`,
+MoonFrame 0.8.0 and NyaCSV 0.3.4 with `moonc v0.10.16+b1a0e846e`.
+It uses public `Series::from_scalars` to retain typed Int64/null values.
+MoonFrame 0.8.1 requires a newer core gzip package; 0.6/0.7 reference the removed
+quickcheck/gen package. These versions are not silently patched in caches.
+CI exercises the pinned integration on Linux JS/Wasm/Wasm GC/native and Windows
+JS/native. Completed results belong in the [version verification record](../../docs/ACCEPTANCE.md).
 
 Normal use resolves MoonIce from Mooncakes. To test unpublished local changes,
 run `moon work init . ../..` in this directory; remove that generated `moon.work`

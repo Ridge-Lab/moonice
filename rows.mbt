@@ -2,7 +2,7 @@
 pub(all) struct DataRow {
   file_path : String
   position : Int64
-  values : Map[Int, Scalar]
+  values : Map[Int32, Scalar]
 } derive(Debug, Eq, ToJson)
 
 ///|
@@ -86,11 +86,10 @@ pub fn DataRow::project(
       )
     }
     let compatible = match (field.field_type, value) {
+      (String("int" | "date"), Integer(n)) =>
+        n >= -2147483648L && n <= 2147483647L
       (String("boolean"), Boolean(_))
-      | (
-        String("int" | "long" | "date" | "time" | "timestamp" | "timestamptz"),
-        Integer(_),
-      )
+      | (String("long" | "time" | "timestamp" | "timestamptz"), Integer(_))
       | (String("float" | "double"), Real(_))
       | (String("string"), Text(_))
       | (String("binary"), Binary(_)) => true

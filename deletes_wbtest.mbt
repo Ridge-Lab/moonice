@@ -29,10 +29,10 @@ fn delete_test_metadata() -> TableMetadata {
 
 ///|
 fn delete_test_entry(
-  content : Int,
+  content : Int32,
   sequence : Int64,
-  spec? : Int = 0,
-  region? : String = "east",
+  spec~ : Int32 = 0,
+  region~ : String = "east",
 ) -> ManifestEntry {
   let file = metric_file(0L, 3L)
   {

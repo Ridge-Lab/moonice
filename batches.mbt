@@ -3,11 +3,11 @@
 pub(all) struct ScanSummary {
   snapshot_id : Int64
   schema : Schema
-  read_rows : Int
-  deleted_rows : Int
-  matched_rows : Int
-  scanned_files : Int
-  delete_files : Int
+  read_rows : Int32
+  deleted_rows : Int32
+  matched_rows : Int32
+  scanned_files : Int32
+  delete_files : Int32
 } derive(Debug, ToJson)
 
 ///|
@@ -23,7 +23,7 @@ pub fn scan_batches(
   predicate : Predicate,
   read_file : (String) -> Bytes raise IceError,
   emit : (Array[DataRow]) -> Unit raise IceError,
-  batch_size? : Int = 1024,
+  batch_size~ : Int32 = 1024,
 ) -> ScanSummary raise IceError {
   if batch_size < 1 || batch_size > 100000 {
     raise Invalid("INVALID_BATCH_SIZE", "batch_size", "Expected 1..100000")
@@ -49,7 +49,7 @@ pub fn Bundle::scan_batches(
   predicate : Predicate,
   emit : (Array[DataRow]) -> Unit raise IceError,
   snapshot_id? : Int64,
-  batch_size? : Int = 1024,
+  batch_size~ : Int32 = 1024,
 ) -> ScanSummary raise IceError {
   scan_batches(
     self.metadata,

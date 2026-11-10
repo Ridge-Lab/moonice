@@ -42,7 +42,7 @@ pub fn decode_manifest_list(data : Bytes) -> Array[Manifest] raise IceError {
 ///|
 fn inherited_sequence(
   d : @avro_codec.Datum,
-  status : Int,
+  status : Int32,
   inherited : Int64,
   path : String,
 ) -> Int64 raise IceError {
@@ -164,7 +164,7 @@ fn parse_data_file(d : @avro_codec.Datum) -> DataFile raise IceError {
       "INVALID_EQUALITY_IDS", path, "Equality deletes require field IDs",
     )
   }
-  let seen_ids : Map[Int, Bool] = Map([])
+  let seen_ids : Map[Int32, Bool] = Map([])
   for id in equality_ids {
     if id <= 0 || id > 2147483447 || seen_ids.contains(id) {
       raise Invalid(

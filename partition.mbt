@@ -9,7 +9,7 @@ fn floor_div(n : Int64, d : Int64) -> Int64 {
 }
 
 ///|
-fn transform_width(name : String, prefix : String) -> Int? {
+fn transform_width(name : String, prefix : String) -> Int32? {
   guard name.has_prefix(prefix) && name.has_suffix("]") else { return None }
   let body = name[prefix.length():name.length() - 1]
   if body.is_empty() || !body.iter().all(c => c >= '0' && c <= '9') {
@@ -25,11 +25,11 @@ fn transform_width(name : String, prefix : String) -> Int? {
 
 ///|
 // Iceberg uses Murmur3 x86_32, seed 0; integers use an eight-byte LE encoding.
-fn bucket_hash(bytes : Bytes) -> UInt {
-  fn rot(x : UInt, n : Int) -> UInt {
+fn bucket_hash(bytes : Bytes) -> UInt32 {
+  fn rot(x : UInt32, n : Int32) -> UInt32 {
     (x << n) | (x >> (32 - n))
   }
-  fn mix(k : UInt) -> UInt {
+  fn mix(k : UInt32) -> UInt32 {
     rot(k * 0xcc9e2d51U, 15) * 0x1b873593U
   }
   let mut h = 0U
@@ -227,7 +227,7 @@ pub fn transform_partition(
       (String("string"), Text(s)) =>
         Some(Text(String::from_iter(s.iter().take(width))))
       (String("binary"), Binary(b)) =>
-        Some(Binary(b[:Int::min(width, b.length())].to_owned()))
+        Some(Binary(b[:Int32::min(width, b.length())].to_owned()))
       _ => None
     }
   }

@@ -163,7 +163,7 @@ pub fn load_snapshot(
 ///|
 fn self_spec(
   metadata : TableMetadata,
-  id : Int,
+  id : Int32,
 ) -> PartitionSpec raise IceError {
   match metadata.partition_specs.iter().find_first(s => s.id == id) {
     Some(s) => s

@@ -5,19 +5,19 @@ priv enum FooterValue {
   Num(Int64)
   Blob(Bytes)
   Seq(Array[FooterValue])
-  Obj(Map[Int, FooterValue])
+  Obj(Map[Int32, FooterValue])
   Other
 }
 
 ///|
 priv struct FooterReader {
   bytes : Bytes
-  mut offset : Int
-  mut nodes : Int
+  mut offset : Int32
+  mut nodes : Int32
 }
 
 ///|
-fn FooterReader::take(self : FooterReader, n : Int) -> Bytes raise IceError {
+fn FooterReader::take(self : FooterReader, n : Int32) -> Bytes raise IceError {
   if n < 0 || n > self.bytes.length() - self.offset {
     raise Invalid("INVALID_PARQUET", "footer", "Truncated compact value")
   }
@@ -27,7 +27,7 @@ fn FooterReader::take(self : FooterReader, n : Int) -> Bytes raise IceError {
 }
 
 ///|
-fn FooterReader::byte(self : FooterReader) -> Int raise IceError {
+fn FooterReader::byte(self : FooterReader) -> Int32 raise IceError {
   self.take(1)[0].to_int()
 }
 
@@ -54,7 +54,7 @@ fn FooterReader::integer(self : FooterReader) -> Int64 raise IceError {
 }
 
 ///|
-fn FooterReader::length(self : FooterReader) -> Int raise IceError {
+fn FooterReader::length(self : FooterReader) -> Int32 raise IceError {
   let n = self.varint()
   if n > 1048576UL {
     raise Invalid(
@@ -67,9 +67,9 @@ fn FooterReader::length(self : FooterReader) -> Int raise IceError {
 ///|
 fn FooterReader::value(
   self : FooterReader,
-  kind : Int,
-  depth : Int,
-  collection? : Bool = false,
+  kind : Int32,
+  depth : Int32,
+  collection~ : Bool = false,
 ) -> FooterValue raise IceError {
   self.nodes += 1
   if depth > 32 || self.nodes > 100000 {
@@ -122,12 +122,19 @@ fn FooterReader::value(
         if header == 0 {
           break
         }
-        let id = if header >> 4 == 0 {
-          self.integer().to_int()
+        let wide_id = if header >> 4 == 0 {
+          self.integer()
         } else {
-          previous + (header >> 4)
+          (previous + (header >> 4)).to_int64()
         }
-        if id <= 0 || id > 32767 || values.contains(id) {
+        // Validate before narrowing: Int64.to_int wraps oversized values.
+        if wide_id <= 0L || wide_id > 32767L {
+          raise Invalid(
+            "INVALID_PARQUET", "footer", "Thrift field ID is outside its positive i16 domain",
+          )
+        }
+        let id = wide_id.to_int()
+        if values.contains(id) {
           raise Invalid(
             "INVALID_PARQUET", "footer", "Invalid or duplicate Thrift field ID",
           )
@@ -142,7 +149,7 @@ fn FooterReader::value(
 }
 
 ///|
-fn footer_num(fields : Map[Int, FooterValue], id : Int) -> Int64? {
+fn footer_num(fields : Map[Int32, FooterValue], id : Int32) -> Int64? {
   match fields.get(id) {
     Some(Num(n)) => Some(n)
     Some(Blob(_) | Seq(_) | Obj(_) | Other) | None => None
@@ -151,7 +158,7 @@ fn footer_num(fields : Map[Int, FooterValue], id : Int) -> Int64? {
 
 ///|
 /// Return flat leaf field IDs in Parquet column order; never guess from names.
-pub fn parquet_field_ids(bytes : Bytes) -> Array[Int] raise IceError {
+pub fn parquet_field_ids(bytes : Bytes) -> Array[Int32] raise IceError {
   let n = bytes.length()
   if n < 12 || bytes[:4] != b"PAR1" || bytes[n - 4:] != b"PAR1" {
     raise Invalid("INVALID_PARQUET", "footer", "Missing PAR1 magic")
@@ -209,5 +216,6 @@ pub fn parquet_field_ids(bytes : Bytes) -> Array[Int] raise IceError {
     seen[id] = true
     ids.push(id.to_int())
   }
+  validate_parquet_layout(fields, bytes, n - 8 - length.to_int(), ids.length())
   ids
 }

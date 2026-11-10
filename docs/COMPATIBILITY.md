@@ -1,6 +1,6 @@
 # Compatibility and boundaries
 
-MoonIce 0.2.1 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
+MoonIce 0.3.0 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
 
 | Surface | Current behavior |
 |---|---|
@@ -28,8 +28,8 @@ MoonIce 0.2.1 is a bounded Iceberg v2 reader/inspector, not a complete standards
 
 The core and optional MoonFrame consumer use the same pinned toolchain and
 dependency versions. Their JS/Wasm/Wasm GC/native jobs are defined in CI; actual
-results are recorded in [validation](ACCEPTANCE.md). The Parquet 0.2.2 and x 0.5.5
-upgrade resolves the filesystem interface conflict documented for 0.2.0.
+results are recorded in [validation](ACCEPTANCE.md). The current dependency graph is resolved from published versions without cache patches.
+The optional MoonFrame example pins 0.8.0 for the declared 0.10.16 compiler.
 
 Independent PyArrow fixtures verify NONE and Snappy compression with dictionary
 encoding, multiple row groups, nulls and exact Int64. Gzip and Zstd fixtures return
@@ -47,12 +47,12 @@ original row predicate after decoding; missing metrics are not proof of exclusio
 
 - Offline bundle: at most 10,000 objects, 64 MiB per decoded object, 128 MiB decoded in total; JSON length also bounded.
 - Raw metadata: at most 8 MiB of string code units.
-- Manifest OCF: 64 MiB input, 1 MiB header metadata, 8 MiB block bytes, 100,000 records per block, one million resulting entries; one million live entries across a loaded snapshot.
-- Parquet: 64 MiB input, 8 MiB footer, 100,000 rows per file; compact footer depth 32 / nodes 100,000.
+- Manifest OCF: 64 MiB input, 1 MiB header metadata, 8 MiB compressed block bytes (preflight) and decoded block bytes (post-decompression), 100,000 records per block, one million entries counted across all blocks before datum materialization; one million live entries across a loaded snapshot.
+- Parquet: 64 MiB input, 8 MiB footer, 100,000 rows and five million materialized cells per file; compact footer and page-header depth 32 / nodes 100,000 each. Before page decoding, validate row-group/column/page counts, byte ranges, overlaps and a cumulative 64 MiB declared uncompressed-page/header budget. Cross-file column chunks and unknown page types fail explicitly.
 - Scan: one million data rows and 100,000 distinct delete rows; output limit 0–100,000, default 1,000.
 - Predicate depth: 64.
 
-These guards limit ordinary oversized inputs; they are not a complete hostile-input sandbox. Underlying codecs allocate decoded structures, and compressed data can expand. Use trusted, bounded diagnostic samples; a production service needs stronger streaming, allocation and decompression budgets.
+These guards limit ordinary oversized inputs; they are not a complete hostile-input sandbox. These are format and allocation-dimension budgets, not an exact process-RSS ceiling. Underlying codecs allocate decoded structures. Avro DEFLATE still decompresses a block before the dependency checks its decoded-size limit; the new envelope preflight is not a decompression sandbox. Use trusted, bounded diagnostic samples; a production service needs process isolation plus stronger streaming, allocation and decompression budgets.
 
 The current scanner materializes files. Batch callbacks avoid a single combined
 result array but do not impose a decoder allocation budget. A callback error stops

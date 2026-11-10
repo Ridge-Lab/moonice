@@ -4,10 +4,13 @@ target/
 target
 .mooncakes/
 .moonagent/
+work/
+__pycache__/
 web/moonice.js
 web/*.icebundle.json
 web/LICENSE
 web/THIRD_PARTY.md
+web/licenses/
 integrations/moonframe/moon.work
 
 # Entrant forms and private handoff bundles belong outside this repository.

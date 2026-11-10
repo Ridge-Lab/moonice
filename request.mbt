@@ -7,15 +7,15 @@ fn json_object(fields : Array[(String, Json)]) -> Json {
 pub fn Scalar::display_json(self : Scalar) -> Json {
   match self {
     Missing => Json::null()
-    Boolean(b) => b.to_json()
-    Integer(n) => n.to_json()
+    Boolean(b) => Json(b)
+    Integer(n) => Json(n)
     Real(n) =>
       if n.is_nan() {
         Json::string("NaN")
       } else if n.is_inf() {
         Json::string(n.to_string())
       } else {
-        n.to_json()
+        Json(n)
       }
     Text(s) => Json::string(s)
     Binary(b) => json_object([("base64", Json::string(@base64.encode(b)))])
@@ -28,16 +28,16 @@ fn scan_json(result : ScanResult) -> Json raise IceError {
     let values = row.project(result.schema)
     json_object([
       ("file", Json::string(row.file_path)),
-      ("position", row.position.to_json()),
+      ("position", Json(row.position)),
       ("values", Json::object(values.map((_, v) => v.display_json()))),
     ])
   })
   json_object([
-    ("rows", rows.to_json()),
-    ("read_rows", result.read_rows.to_json()),
-    ("deleted_rows", result.deleted_rows.to_json()),
-    ("matched_rows", result.matched_rows.to_json()),
-    ("truncated", result.truncated.to_json()),
+    ("rows", Json(rows)),
+    ("read_rows", Json(result.read_rows)),
+    ("deleted_rows", Json(result.deleted_rows)),
+    ("matched_rows", Json(result.matched_rows)),
+    ("truncated", Json(result.truncated)),
   ])
 }
 
@@ -89,9 +89,9 @@ fn request_inner(source : String, options : String) -> Json raise IceError {
     ("metadata", bundle.metadata.to_json()),
     ("snapshot", state.snapshot.to_json()),
     ("schema", state.schema.to_json()),
-    ("manifests", state.manifests.to_json()),
+    ("manifests", Json(state.manifests)),
     ("plan", plan.to_json()),
-    ("deletes", delete_plan.to_json()),
+    ("deletes", Json(delete_plan)),
   ]
   if action == "plan" {
     return json_object(base)
@@ -124,12 +124,12 @@ fn request_inner(source : String, options : String) -> Json raise IceError {
 /// output values are decimal strings. Errors always include code/path/message.
 pub fn run_request(bundle_json : String, options_json : String) -> String {
   json_object([
-    ("ok", true.to_json()),
+    ("ok", Json(true)),
     ("result", request_inner(bundle_json, options_json)),
   ]).stringify() catch {
     Invalid(code, path, message) =>
       json_object([
-        ("ok", false.to_json()),
+        ("ok", Json(false)),
         (
           "error",
           json_object([

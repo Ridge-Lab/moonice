@@ -118,7 +118,7 @@ fn parse_schema(j : Json) -> Schema raise IceError {
     }
     field
   })
-  let ids : Map[Int, Bool] = Map([])
+  let ids : Map[Int32, Bool] = Map([])
   let names : Map[String, Bool] = Map([])
   for f in fields {
     if ids.contains(f.id) || names.contains(f.name) {
@@ -183,7 +183,7 @@ fn parse_snapshot(j : Json) -> Snapshot raise IceError {
 
 ///|
 fn validate_metadata(table : TableMetadata) -> Unit raise IceError {
-  let schemas : Map[Int, Bool] = Map([])
+  let schemas : Map[Int32, Bool] = Map([])
   for s in table.schemas {
     if s.id < 0 {
       raise Invalid(
@@ -200,14 +200,14 @@ fn validate_metadata(table : TableMetadata) -> Unit raise IceError {
       "SCHEMA_NOT_FOUND", "current-schema-id", "Current schema is missing",
     )
   }
-  let specs : Map[Int, Bool] = Map([])
+  let specs : Map[Int32, Bool] = Map([])
   for s in table.partition_specs {
     if s.id < 0 {
       raise Invalid(
         "INVALID_SPEC", "partition-specs", "Spec IDs must be nonnegative",
       )
     }
-    let field_ids : Map[Int, Bool] = Map([])
+    let field_ids : Map[Int32, Bool] = Map([])
     let names : Map[String, Bool] = Map([])
     for field in s.fields {
       if field.source_id <= 0 ||

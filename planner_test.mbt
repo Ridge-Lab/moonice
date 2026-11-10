@@ -37,8 +37,8 @@ test "planning matches every frozen PyIceberg reference file set" {
 
 ///|
 test "nulls and boolean composition preserve row filtering semantics" {
-  let missing : Map[Int, @moonice.Scalar] = Map([])
-  let row : Map[Int, @moonice.Scalar] = Map([(1, Integer(11L))])
+  let missing : Map[Int32, @moonice.Scalar] = Map([])
+  let row : Map[Int32, @moonice.Scalar] = Map([(1, Integer(11L))])
   let p : @moonice.Predicate = Or(IsNull(1), Compare(1, Ge, Integer(10L)))
   assert_true(p.matches(missing))
   assert_true(p.matches(row))

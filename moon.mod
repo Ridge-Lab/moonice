@@ -11,7 +11,7 @@
 
 name = "Ridge-Lab/moonice"
 
-version = "0.2.1"
+version = "0.3.0"
 
 readme = "README.md"
 
@@ -28,5 +28,8 @@ description = "MoonBit-native Iceberg v2 reading with partition evolution, delet
 import {
   "mizchi/parquet@0.2.2",
   "yugonlian/moon-avro@0.3.0",
-  "moonbitlang/x@0.5.5",
+  "moonbitlang/x@0.5.7",
+  // Pin transitive tooling to manifests accepted by MoonBit 0.10.16.
+  "moonbitlang/quickcheck@0.15.1",
+  "mizchi/duckdb@0.6.6",
 }

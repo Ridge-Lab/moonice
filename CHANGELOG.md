@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — 2026-11-10
+
+- Upgrade the compiler/core floor to 0.10.16 and resolve compatible public dependencies without modifying caches.
+- Reject compact field-ID overflow and out-of-range int/date row projections.
+- Preflight Parquet row-group, column and page allocation dimensions, cumulative expanded bytes and materialized cells; preflight total OCF block counts before allocating records.
+- Add a repeatable quick/full/release verification entry, fail-closed runner tests, seeded live PyIceberg/PyArrow comparisons, CLI and distribution checks.
+- Pin MoonFrame 0.8.0 and use its public scalar constructor; retain exact Int64/null transfer.
+- Preserve the matching core NOTICE and third-party licenses in web and CLI outputs.
+- Add Linux four-backend and Windows JS/native verification workflows. Successful local and published CI evidence are recorded separately.
+
 ## 0.2.1 — 2026-09-30
 
 - Raised the supported toolchain floor to moonc 0.10.14 and pinned CI/compiler

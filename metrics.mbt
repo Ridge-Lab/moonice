@@ -1,5 +1,5 @@
 ///|
-fn little_integer(bytes : Bytes, width : Int) -> Int64? {
+fn little_integer(bytes : Bytes, width : Int32) -> Int64? {
   if bytes.length() != width {
     return None
   }

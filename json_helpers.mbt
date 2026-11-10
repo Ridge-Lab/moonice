@@ -31,7 +31,7 @@ fn array_value(j : Json, path : String) -> Array[Json] raise IceError {
 }
 
 ///|
-fn int_value(j : Json, path : String) -> Int raise IceError {
+fn int_value(j : Json, path : String) -> Int32 raise IceError {
   match j {
     Number(n, ..) if n >= -2147483648.0 &&
       n <= 2147483647.0 &&
@@ -87,7 +87,7 @@ fn argument_long(j : Json, path : String) -> Int64 raise IceError {
 }
 
 ///|
-fn opt_int(j : Json, path : String) -> Int? raise IceError {
+fn opt_int(j : Json, path : String) -> Int32? raise IceError {
   match j {
     Null => None
     _ => Some(int_value(j, path))

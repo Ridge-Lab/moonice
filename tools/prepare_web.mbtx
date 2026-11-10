@@ -14,5 +14,10 @@ fn main raise {
   for name in ["LICENSE", "THIRD_PARTY.md"] {
     @fs.write_bytes_to_file("web/" + name, @fs.read_file_to_bytes(name))
   }
+  if !@fs.path_exists("web/licenses") { @fs.create_dir("web/licenses") }
+  for name in ["moonbit-core-LICENSE", "moonbit-core-NOTICE", "moon-avro-LICENSE", "moon_yazi-LICENSE", "parquet-LICENSE", "moonstretch-MIT"] {
+    @fs.write_bytes_to_file("web/licenses/" + name,
+      @fs.read_file_to_bytes("licenses/" + name))
+  }
   println("Web assets prepared in web/")
 }

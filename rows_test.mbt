@@ -31,3 +31,27 @@ test "truncated and non-Parquet input reports a typed error" {
     }
   }
 }
+
+///|
+test "projection rejects values outside the declared int and date domain" {
+  for kind in ["int", "date"] {
+    let schema : @moonice.Schema = {
+      id: 0,
+      fields: [
+        { id: 1, name: "value", required: true, field_type: Json(kind), },
+      ],
+    }
+    for value in [-2147483649L, 2147483648L, 9223372036854775807L] {
+      let row : @moonice.DataRow = {
+        file_path: "memory://invalid",
+        position: 0L,
+        values: Map([(1, Integer(value))]),
+      }
+      try row.project(schema) catch {
+        @moonice.Invalid(code, _, _) => assert_eq(code, "UNSUPPORTED_TYPE")
+      } noraise {
+        _ => fail("Out-of-range value accepted for \{kind}")
+      }
+    }
+  }
+}

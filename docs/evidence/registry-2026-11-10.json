@@ -1,0 +1,268 @@
+{
+  "checked_on": "2026-11-10",
+  "source": "https://mooncakes.io/api/v0/modules",
+  "returned_modules": 3702,
+  "fields_searched": [
+    "name",
+    "description",
+    "keywords"
+  ],
+  "terms": [
+    "iceberg",
+    "lakehouse",
+    "data lake",
+    "data-lake",
+    "delta lake",
+    "delta-lake",
+    "hudi",
+    "paimon",
+    "parquet",
+    "avro",
+    "arrow",
+    "dataframe",
+    "duckdb"
+  ],
+  "matches": [
+    {
+      "name": "codeworm96/magpiedb",
+      "version": "0.2.0",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/codeworm96/magpiedb",
+      "keywords": [
+        "sql",
+        "database",
+        "json",
+        "csv",
+        "parquet"
+      ],
+      "description": "vibe coded lightweight OLAP database",
+      "is_new": false,
+      "created_at": "2026-04-20T06:57:07.939677"
+    },
+    {
+      "name": "dongxuan2012/oscbridge",
+      "version": "0.2.0",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "MIT",
+      "repository": "https://github.com/dongxuan2012/moonbit-oscbridge",
+      "keywords": [
+        "comtrade",
+        "arrow",
+        "waveform",
+        "data-validation"
+      ],
+      "description": "Checked COMTRADE ASCII recording windows through existing MoonArrow IPC",
+      "is_new": false,
+      "created_at": "2026-09-30T00:49:24.282794"
+    },
+    {
+      "name": "f4ah6o/duckdb",
+      "version": "0.8.0",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/f4ah6o/duckdb.mbt",
+      "keywords": [
+        "duckdb",
+        "database",
+        "sql",
+        "ffi",
+        "wasm",
+        "moonbit"
+      ],
+      "description": "MoonBit bindings for DuckDB on native and JavaScript targets (Node.js and browser WASM backends)",
+      "is_new": false,
+      "created_at": "2026-10-21T15:17:18.684104"
+    },
+    {
+      "name": "ihb2032/MoonFrame",
+      "version": "0.8.1",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/ihb2032/MoonFrame",
+      "keywords": [
+        "dataframe",
+        "data-analysis",
+        "csv",
+        "tabular"
+      ],
+      "description": "A lightweight DataFrame and tabular-data library for MoonBit",
+      "is_new": false,
+      "created_at": "2026-10-30T11:42:13.832329"
+    },
+    {
+      "name": "mizchi/duckdb",
+      "version": "0.6.6",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/mizchi/duckdb.mbt",
+      "keywords": [
+        "duckdb"
+      ],
+      "description": "MoonBit bindings for DuckDB (fork of f4ah6o/duckdb that builds on current MoonBit toolchains)",
+      "is_new": false,
+      "created_at": "2026-11-08T17:11:52.504409"
+    },
+    {
+      "name": "mizchi/parquet",
+      "version": "0.2.2",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/mizchi/parquet",
+      "keywords": [
+        "moonbit",
+        "parquet"
+      ],
+      "description": "Parquet reader/writer for MoonBit.",
+      "is_new": false,
+      "created_at": "2026-09-24T09:29:04.519592"
+    },
+    {
+      "name": "Ridge-Lab/moonice",
+      "version": "0.2.1",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/Ridge-Lab/moonice",
+      "keywords": [
+        "iceberg",
+        "snapshot",
+        "data-lake",
+        "scan-planning"
+      ],
+      "description": "MoonBit-native Iceberg v2 reading with partition evolution, delete semantics and explainable scan planning.",
+      "is_new": false,
+      "created_at": "2026-09-30T13:54:34.732869"
+    },
+    {
+      "name": "sgy1023-crt/parquet",
+      "version": "0.3.0",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/sgy1023-crt/parquet",
+      "keywords": [
+        "moonbit",
+        "parquet"
+      ],
+      "description": "MoonBit Parquet reader/writer with row-group statistics and selective decoding; based on mizchi/parquet.",
+      "is_new": false,
+      "created_at": "2026-10-30T04:39:22.783847"
+    },
+    {
+      "name": "shunge/arrow",
+      "version": "0.2.1",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "MIT",
+      "repository": "https://github.com/buildliming/MoonArrow",
+      "keywords": [
+        "arrow",
+        "ipc",
+        "columnar",
+        "serialization"
+      ],
+      "description": "MoonArrow: pure MoonBit Arrow IPC stream and file reader/writer with checked metadata and PyArrow interoperability.",
+      "is_new": false,
+      "created_at": "2026-09-30T03:01:45.87744"
+    },
+    {
+      "name": "smallbearrr/pandas",
+      "version": "0.7.1",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/moonbit-community/pandas",
+      "keywords": [
+        "pandas",
+        "polars",
+        "dataframe",
+        "data cleaning",
+        "data manipulation"
+      ],
+      "description": "Provide efficient data manipulation and analysis",
+      "is_new": false,
+      "created_at": "2025-04-02T08:51:51.472189"
+    },
+    {
+      "name": "superbigcup325/colenc",
+      "version": "0.1.4",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/superbigcup325/colenc",
+      "keywords": [
+        "parquet",
+        "columnar",
+        "encoding",
+        "compression",
+        "bit-packing"
+      ],
+      "description": "Columnar encoding kernel for MoonBit: the Parquet page-level encoding family as a reusable, verifiable, pluggable library.",
+      "is_new": false,
+      "created_at": "2026-11-09T04:09:55.522547"
+    },
+    {
+      "name": "superbigcup325/moonlake",
+      "version": "0.6.4",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/superbigcup325/moonlake",
+      "keywords": [
+        "sql",
+        "olap",
+        "query-engine",
+        "csv",
+        "parquet",
+        "columnar"
+      ],
+      "description": "Embeddable analytical query engine for MoonBit: run SQL over CSV/Parquet files, native and WebAssembly from one codebase.",
+      "is_new": false,
+      "created_at": "2026-10-31T13:27:49.015561"
+    },
+    {
+      "name": "xiguaAp6y3/moondelta-core",
+      "version": "0.3.1",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/xiguaAp6y3/moondelta-core",
+      "keywords": [
+        "delta-lake",
+        "table-format",
+        "lakehouse",
+        "parquet",
+        "data"
+      ],
+      "description": "MoonBit-native Delta Lake table-format kernel: transaction log replay, snapshots, time travel, scan planning and append writes.",
+      "is_new": false,
+      "created_at": "2026-10-31T03:27:48.862582"
+    },
+    {
+      "name": "yugonlian/moon-avro",
+      "version": "0.3.0",
+      "yanked": false,
+      "yanked_reason": null,
+      "license": "Apache-2.0",
+      "repository": "https://github.com/yugonlian/moon-avro",
+      "keywords": [
+        "avro",
+        "serialization",
+        "ocf",
+        "codec",
+        "data"
+      ],
+      "description": "Pure MoonBit Apache Avro schema, datum codec, and Object Container File toolkit.",
+      "is_new": false,
+      "created_at": "2026-08-22T19:10:29.614458"
+    }
+  ],
+  "limits": "Metadata keyword search only; not a complete code similarity audit or proof that no substitute exists."
+}

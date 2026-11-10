@@ -9,8 +9,8 @@ pub(all) struct Finding {
 
 ///|
 pub(all) struct Diagnosis {
-  checked_snapshots : Int
-  checked_objects : Int
+  checked_snapshots : Int32
+  checked_objects : Int32
   findings : Array[Finding]
 } derive(Debug, ToJson)
 
@@ -119,7 +119,7 @@ pub fn Bundle::diagnose(self : Bundle) -> Diagnosis {
 
 ///|
 pub(all) struct SchemaChange {
-  field_id : Int
+  field_id : Int32
   kind : String
   before : Field?
   after : Field?
@@ -131,7 +131,7 @@ pub(all) struct SnapshotDiff {
   to_id : Int64
   added : Array[ManifestEntry]
   removed : Array[ManifestEntry]
-  retained_files : Int
+  retained_files : Int32
   added_records : Int64
   removed_records : Int64
   schema_changes : Array[SchemaChange]

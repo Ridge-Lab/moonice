@@ -11,15 +11,15 @@ pub(all) enum CompareOp {
 /// Predicates bind to stable field IDs. Missing values never satisfy comparisons.
 pub(all) enum Predicate {
   All
-  Compare(Int, CompareOp, Scalar)
-  IsNull(Int)
-  NotNull(Int)
+  Compare(Int32, CompareOp, Scalar)
+  IsNull(Int32)
+  NotNull(Int32)
   And(Predicate, Predicate)
   Or(Predicate, Predicate)
 } derive(Debug, Eq, ToJson)
 
 ///|
-fn scalar_compare(a : Scalar, b : Scalar) -> Int? {
+fn scalar_compare(a : Scalar, b : Scalar) -> Int32? {
   match (a, b) {
     (Integer(x), Integer(y)) => Some(x.compare(y))
     (Real(x), Real(y)) =>
@@ -37,7 +37,7 @@ fn scalar_compare(a : Scalar, b : Scalar) -> Int? {
 }
 
 ///|
-fn compare_matches(op : CompareOp, c : Int) -> Bool {
+fn compare_matches(op : CompareOp, c : Int32) -> Bool {
   match op {
     Eq => c == 0
     Lt => c < 0
@@ -48,7 +48,7 @@ fn compare_matches(op : CompareOp, c : Int) -> Bool {
 }
 
 ///|
-pub fn Predicate::matches(self : Predicate, row : Map[Int, Scalar]) -> Bool {
+pub fn Predicate::matches(self : Predicate, row : Map[Int32, Scalar]) -> Bool {
   match self {
     All => true
     Compare(id, op, value) =>
@@ -64,7 +64,7 @@ pub fn Predicate::matches(self : Predicate, row : Map[Int, Scalar]) -> Bool {
 }
 
 ///|
-fn predicate_field(schema : Schema, id : Int) -> Field raise IceError {
+fn predicate_field(schema : Schema, id : Int32) -> Field raise IceError {
   match schema.field(id) {
     Some(f) => f
     None =>
@@ -81,7 +81,7 @@ pub fn Predicate::validate(
   self : Predicate,
   schema : Schema,
 ) -> Unit raise IceError {
-  fn walk(p : Predicate, depth : Int) -> Unit raise IceError {
+  fn walk(p : Predicate, depth : Int32) -> Unit raise IceError {
     if depth > 64 {
       raise Invalid("RESOURCE_LIMIT", "filter", "Predicate nesting exceeds 64")
     }
@@ -128,7 +128,7 @@ pub fn parse_predicate(
   let root = @json.parse(source) catch {
     _ => raise Invalid("INVALID_JSON", "filter", "Invalid predicate JSON")
   }
-  fn parse(j : Json, depth : Int) -> Predicate raise IceError {
+  fn parse(j : Json, depth : Int32) -> Predicate raise IceError {
     if depth > 64 {
       raise Invalid("RESOURCE_LIMIT", "filter", "Predicate nesting exceeds 64")
     }

@@ -1,6 +1,6 @@
 ///|
 fn usage() -> Unit {
-  println("MoonIce 0.2.1 — Iceberg v2 snapshot inspector")
+  println("MoonIce 0.3.0 — Iceberg v2 snapshot inspector")
   println("moon run cmd/main --target js -- <action> <bundle> [options]")
   println("Actions: inspect, plan, scan, diff, check")
   println(
@@ -12,7 +12,7 @@ fn usage() -> Unit {
 }
 
 ///|
-fn execute(args : Array[String]) -> Int raise {
+fn execute(args : Array[String]) -> Int32 raise {
   if args.length() < 2 || args[1] == "--help" || args[1] == "help" {
     usage()
     return 0

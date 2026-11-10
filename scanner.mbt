@@ -3,16 +3,16 @@ pub(all) struct ScanResult {
   snapshot_id : Int64
   schema : Schema
   rows : Array[DataRow]
-  read_rows : Int
-  deleted_rows : Int
-  matched_rows : Int
+  read_rows : Int32
+  deleted_rows : Int32
+  matched_rows : Int32
   truncated : Bool
 } derive(Debug, ToJson)
 
 ///|
 fn equality_key(
   row : DataRow,
-  ids : Array[Int],
+  ids : Array[Int32],
   require_present : Bool,
 ) -> String raise IceError {
   let values : Array[Scalar] = []
@@ -34,7 +34,7 @@ fn equality_key(
     }
     values.push(value)
   }
-  values.to_json().stringify()
+  Json(values).stringify()
 }
 
 ///|
@@ -67,7 +67,7 @@ fn walk_rows(
       )
     }
     let positions : Map[Int64, Bool] = Map([])
-    let equality : Array[(Array[Int], Map[String, Bool])] = []
+    let equality : Array[(Array[Int32], Map[String, Bool])] = []
     for deletion in deletions {
       if !explain_delete(metadata, entry, deletion).applies {
         continue
@@ -147,7 +147,7 @@ pub fn scan_rows(
   state : SnapshotState,
   predicate : Predicate,
   read_file : (String) -> Bytes raise IceError,
-  limit? : Int = 1000,
+  limit~ : Int32 = 1000,
 ) -> ScanResult raise IceError {
   if limit < 0 || limit > 100000 {
     raise Invalid("INVALID_LIMIT", "limit", "Expected 0..100000")
@@ -174,7 +174,7 @@ pub fn Bundle::scan(
   self : Bundle,
   predicate : Predicate,
   snapshot_id? : Int64,
-  limit? : Int = 1000,
+  limit~ : Int32 = 1000,
 ) -> ScanResult raise IceError {
   scan_rows(
     self.metadata,

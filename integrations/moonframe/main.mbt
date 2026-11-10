@@ -33,8 +33,24 @@ fn demonstrate() -> Unit raise {
     batch_size=1,
   )
   let df = @frame.DataFrame([
-    @series.Series::from_int_options("id", ids),
-    @series.Series::from_string_options("category", categories),
+    @series.Series::from_scalars(
+      "id",
+      ids.map(n => {
+        match n {
+          Some(n) => @types.Int(n)
+          None => @types.Null
+        }
+      }),
+    ),
+    @series.Series::from_scalars(
+      "category",
+      categories.map(s => {
+        match s {
+          Some(s) => @types.String(s)
+          None => @types.Null
+        }
+      }),
+    ),
   ])
   let sum = df.get_column("id").sum().as_int()
   println(
@@ -46,9 +62,9 @@ fn demonstrate() -> Unit raise {
     @sys.exit(1)
   }
   // A separate precision check guards this conversion's central contract.
-  let wide = @series.Series::from_int_options("id", [
-    Some(9007199254740993L),
-    None,
+  let wide = @series.Series::from_scalars("id", [
+    @types.Int(9007199254740993L),
+    @types.Null,
   ])
   if wide.get(0) != @types.Int(9007199254740993L) || wide.get(1) != @types.Null {
     @sys.exit(1)

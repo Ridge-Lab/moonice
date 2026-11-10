@@ -14,7 +14,7 @@ pub impl Show for IceError with fn output(self, logger) {
 
 ///|
 pub(all) struct Field {
-  id : Int
+  id : Int32
   name : String
   required : Bool
   field_type : Json
@@ -22,21 +22,21 @@ pub(all) struct Field {
 
 ///|
 pub(all) struct Schema {
-  id : Int
+  id : Int32
   fields : Array[Field]
 } derive(Debug, Eq, ToJson)
 
 ///|
 pub(all) struct PartitionField {
-  source_id : Int
-  field_id : Int
+  source_id : Int32
+  field_id : Int32
   name : String
   transform : String
 } derive(Debug, Eq, ToJson)
 
 ///|
 pub(all) struct PartitionSpec {
-  id : Int
+  id : Int32
   fields : Array[PartitionField]
 } derive(Debug, Eq, ToJson)
 
@@ -47,7 +47,7 @@ pub(all) struct Snapshot {
   sequence_number : Int64
   timestamp_ms : Int64
   manifest_list : String
-  schema_id : Int?
+  schema_id : Int32?
   operation : String
 } derive(Debug, Eq, ToJson)
 
@@ -63,8 +63,8 @@ pub(all) struct SnapshotRef {
 pub(all) struct TableMetadata {
   uuid : String
   location : String
-  current_schema_id : Int
-  default_spec_id : Int
+  current_schema_id : Int32
+  default_spec_id : Int32
   last_sequence_number : Int64
   current_snapshot_id : Int64?
   schemas : Array[Schema]
@@ -76,7 +76,7 @@ pub(all) struct TableMetadata {
 ///|
 pub fn TableMetadata::schema(
   self : TableMetadata,
-  id : Int,
+  id : Int32,
 ) -> Schema raise IceError {
   for schema in self.schemas {
     if schema.id == id {
@@ -87,7 +87,7 @@ pub fn TableMetadata::schema(
 }
 
 ///|
-pub fn Schema::field(self : Schema, id : Int) -> Field? {
+pub fn Schema::field(self : Schema, id : Int32) -> Field? {
   self.fields.iter().find_first(f => f.id == id)
 }
 

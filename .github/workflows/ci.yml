@@ -3,73 +3,74 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+  release:
+    types: [published]
 permissions:
   contents: read
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  verify:
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        target: [wasm, wasm-gc, js, native]
+        include:
+          - os: ubuntu-latest
+            targets: js wasm wasm-gc native
+          - os: windows-latest
+            targets: js native
     steps:
       - uses: actions/checkout@v5
       - uses: hustcer/setup-moonbit@v1.22
         with:
-          version: "0.10.14+7d59c7ec9"
-          core-version: "0.10.14+7d59c7ec9"
-      - run: moon version --all
-      - run: moon update
-      - run: moon fmt --check
-      - run: moon check --target ${{ matrix.target }} --deny-warn
-      - run: moon test --target ${{ matrix.target }} --deny-warn
-      - run: moon build --target ${{ matrix.target }} --release
-      - name: Exercise CLI entry point
-        if: matrix.target == 'js' || matrix.target == 'native'
-        run: moon run --target ${{ matrix.target }} cmd/main -- scan fixtures/deletes.icebundle.json --limit 1
-      - name: Exercise public library integration
-        run: moon run --target ${{ matrix.target }} examples/library_read
-      - name: Exercise batch reader and partition evolution
-        run: moon run --target ${{ matrix.target }} examples/batch_read
-  integration:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [wasm, wasm-gc, js, native]
-    steps:
-      - uses: actions/checkout@v5
-      - uses: hustcer/setup-moonbit@v1.22
+          version: "0.10.16+b1a0e846e"
+          core-version: "0.10.16+b1a0e846e"
+      - uses: actions/setup-node@v4
         with:
-          version: "0.10.14+7d59c7ec9"
-          core-version: "0.10.14+7d59c7ec9"
-      - run: moon update
-      - name: Test current source with MoonFrame
-        working-directory: integrations/moonframe
-        run: |
-          moon work init . ../..
-          moon run --target ${{ matrix.target }} .
-  web:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: hustcer/setup-moonbit@v1.22
+          node-version: '24'
+      - uses: actions/setup-python@v5
         with:
-          version: "0.10.14+7d59c7ec9"
-          core-version: "0.10.14+7d59c7ec9"
+          python-version: '3.12'
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+      - run: python -m pip install -r tools/requirements-reference.txt
       - run: moon update
-      - run: npm run build
+      - run: python scripts/verify.py --profile full --targets ${{ matrix.targets }}
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: moonice-web
-          path: web/
+          name: verification-${{ matrix.os }}
+          path: work/verification/
       - uses: actions/upload-pages-artifact@v3
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: runner.os == 'Linux' && github.ref == 'refs/heads/main' && github.event_name == 'push'
         with:
           path: web/
+  public-package:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hustcer/setup-moonbit@v1.22
+        with:
+          version: "0.10.16+b1a0e846e"
+          core-version: "0.10.16+b1a0e846e"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify registry-only consumer after package publication
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: python scripts/verify.py --profile release --version "${RELEASE_TAG#v}" --targets js wasm wasm-gc native
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: registry-consumer
+          path: work/verification/
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: [test, integration, web]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       pages: write

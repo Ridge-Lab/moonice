@@ -1,6 +1,6 @@
 # MoonIce 在 MoonBit 生态中的位置
 
-核查日期：2026-09-22。本文区分已有能力、本项目新增能力和仍待验证的使用需求。
+核查日期：2026-11-10。本文区分已有能力、本项目新增能力和仍待验证的使用需求。
 
 ## 要解决的具体问题
 
@@ -18,6 +18,9 @@ MoonIce 为 MoonBit 应用实现这部分表语义：输入标准元数据及对
 | [mizchi/parquet](https://github.com/mizchi/parquet) | Parquet 文件读写 | 实际依赖；MoonIce 决定读哪些文件、哪些行可见及字段投影 |
 | [ihb2032/MoonFrame](https://github.com/ihb2032/MoonFrame) | 表格数据过滤、聚合和 CSV/JSON 等输入输出 | 已提供 typed Series 接入示例；没有该项目作者已采用 MoonIce 的证据 |
 | [f4ah6o/duckdb](https://github.com/f4ah6o/duckdb.mbt) | MoonBit 调用 native / JS 的 DuckDB 引擎 | 需要 SQL 查询时应比较的替代路径，不是 MoonIce 的必要前置组件 |
+| [superbigcup325/moonlake](https://github.com/superbigcup325/moonlake) | MoonBit 原生 CSV/Parquet SQL 查询引擎 | 应用需要 SQL 时已有可选引擎；MoonIce 提供 Iceberg 快照、删除关联和扫描对象，本版本未声称接入该引擎 |
+| [xiguaAp6y3/moondelta-core](https://github.com/xiguaAp6y3/moondelta-core) | Delta Lake 事务日志、快照、扫描与有界读写 | 同属数据湖表格式层，但协议为 Delta Lake；不能用其日志回放替代 Iceberg manifest、分区演进与删除序列语义 |
+| [sgy1023-crt/parquet](https://github.com/sgy1023-crt/parquet) | 从 mizchi/parquet 派生的文件格式库；目录中声明行组统计和选择性解码 | 是后续评估解码能力的候选依赖，本项目目前仍使用 mizchi/parquet@0.2.2，未把该分支的能力记为自身功能 |
 
 [DuckDB 自身已有 Iceberg 扩展](https://duckdb.org/docs/current/core_extensions/iceberg/overview)，支持读取表、查看元数据和快照；其绑定也有浏览器后端。不能声称“MoonBit 没办法访问 Iceberg”或“只有 MoonIce 能在浏览器里处理数据”。本次没有实际运行 DuckDB 绑定加 Iceberg 扩展的组合，不将每个后端的该组合写成已验证支持。
 
@@ -56,8 +59,8 @@ visible_rows=2
 创建普通 MoonBit 项目，执行：
 
 ```sh
-moon add Ridge-Lab/moonice@0.2.1
-moon add moonbitlang/x@0.5.5
+moon add Ridge-Lab/moonice@0.3.0
+moon add moonbitlang/x@0.5.7
 ```
 
 将本仓库 `examples/library_read/main.mbt` 与 `moon.pkg` 放入该项目的 `main/`，将删除样本放入其 `fixtures/deletes.icebundle.json`，在新项目根目录运行：
@@ -71,11 +74,11 @@ moon run --target wasm main
 
 ## 查重证据及局限
 
-本次从 [Mooncakes 官方模块目录](https://mooncakes.io/api/v0/modules)读取到 2,607 个模块。按名称、描述、关键词检查 Iceberg、数据湖及相邻格式能力，共匹配八项，其中明确涉及 Iceberg 的只有 `Ridge-Lab/moonice`。完整匹配条目、日期、检索词及局限记录在 [registry-2026-09-22.json](evidence/registry-2026-09-22.json)。[9 月 15 日记录](evidence/registry-2026-09-15.json)保留作为历史证据。
+本次从 [Mooncakes 官方模块目录](https://mooncakes.io/api/v0/modules)读取到 3,702 个模块。按名称、描述、关键词检查 Iceberg、数据湖及相邻格式能力，完整匹配条目、日期、检索词及局限记录在 [registry-2026-11-10.json](evidence/registry-2026-11-10.json)。原始目录的 SHA-256 为 `ed2cf53555a313a0e641d9d5319ef029d9aa0654ae438f45290287a064249010`；发布后目录会变化，重新检索的结果不必字节相同。[9 月 22 日记录](evidence/registry-2026-09-22.json)保留作为历史证据。
 
-复核方法：把官方 JSON 目录保存到 `_build/registry-2026-09-22.json`，在仓库根目录执行 `moon run tools/registry_evidence.mbtx`。这是元数据关键词筛选，不会读取或比较所有项目源码。
+复核方法：把官方 JSON 目录保存到 `_build/registry-2026-11-10.json`，在仓库根目录执行 `moon run tools/registry_evidence.mbtx`。这是元数据关键词筛选，不会读取或比较所有项目源码。表中新增项目另核对了公开 README；没有运行它们的全套功能或基准，不能由文档比较推导性能胜负。
 
-结论限于：本次元数据检索未发现另一个直接同类的 MoonBit 库，已有相邻库和外部引擎路径需要明确区分。这不是对全部源代码的相似度审计，不覆盖未公开、未发布、缺少关键词的实现，也不证明不存在替代品。
+结论限于：本次匹配结果中直接标明 Iceberg 的模块为 MoonIce；生态已经有原生查询引擎和其他数据湖表内核，不能再把“原生数据处理”笼统称为缺口。本项目的增量必须落到 Iceberg 的有效文件选择、删除可见性、字段 ID 和分区演进处理上。这不是对全部源代码的相似度审计，不覆盖未公开、未发布、缺少关键词的实现，也不证明不存在替代品。
 
 ## 还缺少什么
 

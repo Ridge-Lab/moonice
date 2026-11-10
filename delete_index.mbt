@@ -1,7 +1,7 @@
 ///|
 priv enum DeleteIndex {
   Positions(Map[String, Map[Int64, Bool]])
-  Equality(Array[Int], Map[String, Bool])
+  Equality(Array[Int32], Map[String, Bool])
 }
 
 ///|

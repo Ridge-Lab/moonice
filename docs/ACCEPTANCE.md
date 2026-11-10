@@ -1,4 +1,23 @@
-# MoonIce 0.2.1 版本验证记录
+# MoonIce 0.3.0 版本验证记录
+
+核对日期：2026-11-10。本文记录可复现检查及本地结果。远端结果以对应提交和版本标签的 [CI](https://github.com/Ridge-Lab/moonice/actions/workflows/ci.yml) 与 [0.3.0 发布附件](https://github.com/Ridge-Lab/moonice/releases/tag/v0.3.0)为准，不能用下方历史版本结果代替。
+
+| 项目 | 当前证据 |
+|---|---|
+| MoonBit 为主要实现语言 | 核心、CLI、浏览器桥接和标准文件检查为 MoonBit；moonc/core 固定 0.10.16+b1a0e846e |
+| 核心范围 | Iceberg v2 有界只读、分区演进、位置/等值删除、ID 投影；范围见 [COMPATIBILITY](COMPATIBILITY.md) |
+| 可复现入口 | `python scripts/verify.py --profile full --targets js wasm wasm-gc`；本地三后端各50测试通过、检查/构建/两个库示例均通过 |
+| 生态组合 | MoonFrame 0.8.0 同一源码工作区三后端通过：5物理行、3删除、2可见、ID合计6，并验证精确Int64和空值 |
+| 独立验证 | 1377个种子PyIceberg变换对照、4次现场分区演进扫描、8个PyArrow页/空表前置检查；详见 [VALIDATION](VALIDATION.md) |
+| 持续集成 | 单一入口；Linux四后端、Windows JS/native，MSVC已配置；每次上传结果和日志，失败/跳过不算成功 |
+| 分发与许可 | Apache-2.0；实际SDK的LICENSE/NOTICE和依赖许可证逐字节核对，CLI发布目录实际运行通过 |
+| 发布检查 | 从`v0.3.0`标签检出后运行`--profile release --version 0.3.0`；核对标签、源码和实际安装的包身份，并断言5物理行、3删除、2可见、筛选ID=2及越界int拒绝；注册表来源为 [Mooncakes 0.3.0](https://mooncakes.io/docs/Ridge-Lab/moonice@0.3.0/) |
+
+Windows本机没有支持的MSVC环境，因此没有把native类型检查当作native执行结果。动态参考仅使用合成数据；AI辅助开发、验证工具复用和依赖来源均在 [PROVENANCE](PROVENANCE.md) 中说明。没有外部采用或性能优于其他引擎的声明。
+
+---
+
+# 历史：MoonIce 0.2.1 版本验证记录
 
 核对日期：2026-09-30。本文记录实现范围、复现命令与实际发布验证结果。
 

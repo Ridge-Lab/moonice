@@ -18,7 +18,7 @@ pub fn load_snapshot(TableMetadata, (String) -> Bytes raise IceError, snapshot_i
 
 pub fn open_bundle(String) -> Bundle raise IceError
 
-pub fn parquet_field_ids(Bytes) -> Array[Int] raise IceError
+pub fn parquet_field_ids(Bytes) -> Array[Int32] raise IceError
 
 pub fn parse_metadata(String) -> TableMetadata raise IceError
 
@@ -32,9 +32,9 @@ pub fn read_data_rows(Bytes, DataFile) -> Array[DataRow] raise IceError
 
 pub fn run_request(String, String) -> String
 
-pub fn scan_batches(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, (Array[DataRow]) -> Unit raise IceError, batch_size? : Int) -> ScanSummary raise IceError
+pub fn scan_batches(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, (Array[DataRow]) -> Unit raise IceError, batch_size? : Int32) -> ScanSummary raise IceError
 
-pub fn scan_rows(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, limit? : Int) -> ScanResult raise IceError
+pub fn scan_rows(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, limit? : Int32) -> ScanResult raise IceError
 
 pub fn transform_partition(Scalar, Json, String) -> Scalar?
 
@@ -55,8 +55,8 @@ pub(all) struct Bundle {
 pub fn Bundle::diagnose(Self) -> Diagnosis
 pub fn Bundle::load_snapshot(Self, snapshot_id? : Int64) -> SnapshotState raise IceError
 pub fn Bundle::read_file(Self, String) -> Bytes raise IceError
-pub fn Bundle::scan(Self, Predicate, snapshot_id? : Int64, limit? : Int) -> ScanResult raise IceError
-pub fn Bundle::scan_batches(Self, Predicate, (Array[DataRow]) -> Unit raise IceError, snapshot_id? : Int64, batch_size? : Int) -> ScanSummary raise IceError
+pub fn Bundle::scan(Self, Predicate, snapshot_id? : Int64, limit? : Int32) -> ScanResult raise IceError
+pub fn Bundle::scan_batches(Self, Predicate, (Array[DataRow]) -> Unit raise IceError, snapshot_id? : Int64, batch_size? : Int32) -> ScanSummary raise IceError
 pub fn Bundle::to_repr(Self) -> @debug.Repr
 
 pub(all) enum CompareOp {
@@ -72,17 +72,17 @@ pub fn CompareOp::to_json(Self) -> Json
 pub fn CompareOp::to_repr(Self) -> @debug.Repr
 
 pub(all) struct DataFile {
-  content : Int
+  content : Int32
   path : String
   format : String
   partition : Map[String, Scalar]
   record_count : Int64
   size_bytes : Int64
-  lower_bounds : Map[Int, Bytes]
-  upper_bounds : Map[Int, Bytes]
-  null_counts : Map[Int, Int64]
-  nan_counts : Map[Int, Int64]
-  equality_ids : Array[Int]
+  lower_bounds : Map[Int32, Bytes]
+  upper_bounds : Map[Int32, Bytes]
+  null_counts : Map[Int32, Int64]
+  nan_counts : Map[Int32, Int64]
+  equality_ids : Array[Int32]
 } derive(Eq, ToJson, @debug.Debug)
 pub fn DataFile::equal(Self, Self) -> Bool
 pub fn DataFile::not_equal(Self, Self) -> Bool
@@ -92,7 +92,7 @@ pub fn DataFile::to_repr(Self) -> @debug.Repr
 pub(all) struct DataRow {
   file_path : String
   position : Int64
-  values : Map[Int, Scalar]
+  values : Map[Int32, Scalar]
 } derive(Eq, ToJson, @debug.Debug)
 pub fn DataRow::equal(Self, Self) -> Bool
 pub fn DataRow::not_equal(Self, Self) -> Bool
@@ -113,15 +113,15 @@ pub fn DeleteDecision::to_json(Self) -> Json
 pub fn DeleteDecision::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Diagnosis {
-  checked_snapshots : Int
-  checked_objects : Int
+  checked_snapshots : Int32
+  checked_objects : Int32
   findings : Array[Finding]
 } derive(ToJson, @debug.Debug)
 pub fn Diagnosis::to_json(Self) -> Json
 pub fn Diagnosis::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Field {
-  id : Int
+  id : Int32
   name : String
   required : Bool
   field_type : Json
@@ -155,8 +155,8 @@ pub fn Finding::to_repr(Self) -> @debug.Repr
 pub(all) struct Manifest {
   path : String
   length : Int64
-  spec_id : Int
-  content : Int
+  spec_id : Int32
+  content : Int32
   sequence_number : Int64
   min_sequence_number : Int64
   added_snapshot_id : Int64
@@ -168,8 +168,8 @@ pub fn Manifest::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ManifestEntry {
   manifest_path : String
-  spec_id : Int
-  status : Int
+  spec_id : Int32
+  status : Int32
   snapshot_id : Int64
   sequence_number : Int64
   file_sequence_number : Int64
@@ -181,8 +181,8 @@ pub fn ManifestEntry::to_json(Self) -> Json
 pub fn ManifestEntry::to_repr(Self) -> @debug.Repr
 
 pub(all) struct PartitionField {
-  source_id : Int
-  field_id : Int
+  source_id : Int32
+  field_id : Int32
   name : String
   transform : String
 } derive(Eq, ToJson, @debug.Debug)
@@ -192,7 +192,7 @@ pub fn PartitionField::to_json(Self) -> Json
 pub fn PartitionField::to_repr(Self) -> @debug.Repr
 
 pub(all) struct PartitionSpec {
-  id : Int
+  id : Int32
   fields : Array[PartitionField]
 } derive(Eq, ToJson, @debug.Debug)
 pub fn PartitionSpec::equal(Self, Self) -> Bool
@@ -202,14 +202,14 @@ pub fn PartitionSpec::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Predicate {
   All
-  Compare(Int, CompareOp, Scalar)
-  IsNull(Int)
-  NotNull(Int)
+  Compare(Int32, CompareOp, Scalar)
+  IsNull(Int32)
+  NotNull(Int32)
   And(Predicate, Predicate)
   Or(Predicate, Predicate)
 } derive(Eq, ToJson, @debug.Debug)
 pub fn Predicate::equal(Self, Self) -> Bool
-pub fn Predicate::matches(Self, Map[Int, Scalar]) -> Bool
+pub fn Predicate::matches(Self, Map[Int32, Scalar]) -> Bool
 pub fn Predicate::not_equal(Self, Self) -> Bool
 pub fn Predicate::to_json(Self) -> Json
 pub fn Predicate::to_repr(Self) -> @debug.Repr
@@ -244,9 +244,9 @@ pub(all) struct ScanResult {
   snapshot_id : Int64
   schema : Schema
   rows : Array[DataRow]
-  read_rows : Int
-  deleted_rows : Int
-  matched_rows : Int
+  read_rows : Int32
+  deleted_rows : Int32
+  matched_rows : Int32
   truncated : Bool
 } derive(ToJson, @debug.Debug)
 pub fn ScanResult::to_json(Self) -> Json
@@ -255,28 +255,28 @@ pub fn ScanResult::to_repr(Self) -> @debug.Repr
 pub(all) struct ScanSummary {
   snapshot_id : Int64
   schema : Schema
-  read_rows : Int
-  deleted_rows : Int
-  matched_rows : Int
-  scanned_files : Int
-  delete_files : Int
+  read_rows : Int32
+  deleted_rows : Int32
+  matched_rows : Int32
+  scanned_files : Int32
+  delete_files : Int32
 } derive(ToJson, @debug.Debug)
 pub fn ScanSummary::to_json(Self) -> Json
 pub fn ScanSummary::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Schema {
-  id : Int
+  id : Int32
   fields : Array[Field]
 } derive(Eq, ToJson, @debug.Debug)
 pub fn Schema::equal(Self, Self) -> Bool
-pub fn Schema::field(Self, Int) -> Field?
+pub fn Schema::field(Self, Int32) -> Field?
 pub fn Schema::field_named(Self, String) -> Field raise IceError
 pub fn Schema::not_equal(Self, Self) -> Bool
 pub fn Schema::to_json(Self) -> Json
 pub fn Schema::to_repr(Self) -> @debug.Repr
 
 pub(all) struct SchemaChange {
-  field_id : Int
+  field_id : Int32
   kind : String
   before : Field?
   after : Field?
@@ -290,7 +290,7 @@ pub(all) struct Snapshot {
   sequence_number : Int64
   timestamp_ms : Int64
   manifest_list : String
-  schema_id : Int?
+  schema_id : Int32?
   operation : String
 } derive(Eq, ToJson, @debug.Debug)
 pub fn Snapshot::equal(Self, Self) -> Bool
@@ -303,7 +303,7 @@ pub(all) struct SnapshotDiff {
   to_id : Int64
   added : Array[ManifestEntry]
   removed : Array[ManifestEntry]
-  retained_files : Int
+  retained_files : Int32
   added_records : Int64
   removed_records : Int64
   schema_changes : Array[SchemaChange]
@@ -333,8 +333,8 @@ pub fn SnapshotState::to_repr(Self) -> @debug.Repr
 pub(all) struct TableMetadata {
   uuid : String
   location : String
-  current_schema_id : Int
-  default_spec_id : Int
+  current_schema_id : Int32
+  default_spec_id : Int32
   last_sequence_number : Int64
   current_snapshot_id : Int64?
   schemas : Array[Schema]
@@ -342,7 +342,7 @@ pub(all) struct TableMetadata {
   snapshots : Array[Snapshot]
   refs : Array[SnapshotRef]
 } derive(ToJson, @debug.Debug)
-pub fn TableMetadata::schema(Self, Int) -> Schema raise IceError
+pub fn TableMetadata::schema(Self, Int32) -> Schema raise IceError
 pub fn TableMetadata::snapshot(Self, id? : Int64, ref_name? : String) -> Snapshot raise IceError
 pub fn TableMetadata::to_json(Self) -> Json
 pub fn TableMetadata::to_repr(Self) -> @debug.Repr

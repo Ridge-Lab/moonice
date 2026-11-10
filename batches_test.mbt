@@ -70,7 +70,7 @@ test "callback failure stops reads and propagates the original error" {
 test "delete files are read once while shared indexes serve multiple data files" {
   let bundle = @moonice.open_bundle(delete_bundle)
   let state = bundle.load_snapshot()
-  let reads : Map[String, Int] = Map([])
+  let reads : Map[String, Int32] = Map([])
   let summary = @moonice.scan_batches(
     bundle.metadata,
     state,

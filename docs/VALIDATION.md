@@ -1,5 +1,43 @@
 # Validation record
 
+## 0.3.0 — 2026-11-10 (local source; publication tracked separately)
+
+Compiler/core: `moonc v0.10.16+b1a0e846e`; Node 24.14.1; Python 3.12.10.
+`python scripts/verify.py --profile full --targets js wasm wasm-gc` passed:
+50 tests per backend, strict checks, release builds, both library examples,
+MoonFrame 0.8.0 integration, CLI failures/exit codes, staged CLI and dependency
+notice byte comparisons. Run `20261110T140955Z-7b74a943` records all commands,
+logs and source fingerprints under ignored `work/verification/`. The source
+fingerprint remained unchanged throughout the run. Native execution is left
+to Linux/Windows CI because this machine has no supported MSVC toolchain.
+
+The live reference check executed PyIceberg 0.12.0 and PyArrow 25.0.1:
+1377 seeded transform cases (`20261110`), eight independently written Parquet
+preflight files (empty/nonempty, NONE/Snappy, data pages V1/V2), and four scans
+of a newly created table with day→month partition evolution. All row IDs and
+selected file sets matched. These are case counts within checks, not 1389
+separately authored MoonBit tests. Reference output stays in the fresh run
+directory and cannot replace frozen fixtures silently.
+
+Two regressions were reproduced before fixes: compact field ID `4294967297`
+wrapped into ID 1 (46 tests: 45 passed, 1 failed); projecting an out-of-range
+Int64 into an `int` or `date` field succeeded (47 tests: 46 passed, 1 failed).
+Both now reject before narrowing/use. Small synthetic allocation regressions
+cover row-group/column inconsistency, five-million-cell and page-count/expanded
+byte budgets, and 1.1 million claimed OCF records in 220 bytes; they never
+allocate the claimed records. Existing independent fixtures continue passing.
+
+The runner itself rejects missing tools, failed child commands, skipped required
+dependencies and missing fresh artifacts. Its workspace preparation validates
+exact members and works on repeated runs without overwriting a different
+workspace. Generic runner reuse from MoonStretch is attributed under MIT.
+
+New resource checks are format/allocation-dimension guards, not a complete
+hostile-input sandbox. Avro DEFLATE still checks decoded size after decompression;
+see [the precise boundary](COMPATIBILITY.md#resource-limits). No benchmark
+advantage, full Iceberg certification or external adoption is claimed.
+
+
 ## 0.2.1 — 2026-09-30
 
 Compiler: `moonc v0.10.14+7d59c7ec9`; moon: `0.1.20260920`.
