@@ -1,9 +1,10 @@
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct DataRow {
   file_path : String
   position : Int64
   values : Map[Int32, Scalar]
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
 fn parquet_scalar(value : @parquet.Value) -> Scalar {

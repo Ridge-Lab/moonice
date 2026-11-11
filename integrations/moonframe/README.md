@@ -21,15 +21,15 @@ checks `9007199254740993` survives unchanged.
 The adapter is specific to the fixture's `id` and `category` fields. It collects
 the visible rows for a DataFrame; it is not a streaming DataFrame adapter or
 a conversion for every Iceberg type. Example dependency:
-[MoonFrame 0.8.0](https://github.com/ihb2032/MoonFrame), Apache-2.0.
+[MoonFrame 0.8.1](https://github.com/ihb2032/MoonFrame), Apache-2.0.
 
 ## Backend boundary
 
-MoonIce 0.3.0 uses `mizchi/parquet@0.2.2`, `moonbitlang/x@0.5.7`,
-MoonFrame 0.8.0 and NyaCSV 0.3.4 with `moonc v0.10.16+b1a0e846e`.
+MoonIce 0.3.1 uses `mizchi/parquet@0.2.2`, `moonbitlang/x@0.5.7`,
+MoonFrame 0.8.1 and NyaCSV 0.3.4 with `moonc v0.10.20+65efd5b93`.
 It uses public `Series::from_scalars` to retain typed Int64/null values.
-MoonFrame 0.8.1 requires a newer core gzip package; 0.6/0.7 reference the removed
-quickcheck/gen package. These versions are not silently patched in caches.
+MoonFrame 0.8.1 uses the gzip package supplied by this SDK. For SDK 0.10.16,
+check out MoonIce v0.3.0, whose example pins MoonFrame 0.8.0.
 CI exercises the pinned integration on Linux JS/Wasm/Wasm GC/native and Windows
 JS/native. Completed results belong in the [version verification record](../../docs/ACCEPTANCE.md).
 

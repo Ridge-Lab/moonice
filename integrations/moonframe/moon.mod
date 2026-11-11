@@ -1,12 +1,12 @@
 name = "MoonIceExamples/moonframe"
 
-version = "0.3.0"
+version = "0.3.1"
 
 license = "Apache-2.0"
 
 import {
-  "Ridge-Lab/moonice@0.3.0",
-  "ihb2032/MoonFrame@0.8.0",
+  "Ridge-Lab/moonice@0.3.1",
+  "ihb2032/MoonFrame@0.8.1",
   "moonbitlang/x@0.5.7",
   "moonbit-community/NyaCSV@0.3.4",
 }

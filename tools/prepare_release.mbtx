@@ -3,8 +3,8 @@ import { "moonbitlang/x/fs" }
 // Run after `moon build --release --target js`. Archives are made from this
 // explicit staging tree, never from caches, credentials or the whole workspace.
 fn main raise {
-  let root = "_build/distribution/0.3.0/cli"
-  for dir in ["_build/distribution", "_build/distribution/0.3.0", root, root + "/fixtures"] {
+  let root = "_build/distribution/0.3.1/cli"
+  for dir in ["_build/distribution", "_build/distribution/0.3.1", root, root + "/fixtures"] {
     if !@fs.path_exists(dir) { @fs.create_dir(dir) }
   }
   @fs.write_bytes_to_file(root + "/moonice.mjs",
@@ -23,6 +23,6 @@ fn main raise {
       @fs.read_file_to_bytes("licenses/" + name))
   }
   @fs.write_string_to_file(root + "/README.md",
-    "# MoonIce CLI 0.3.0\n\nRequires Node.js (validated with Node 24).\n\n```sh\nnode moonice.mjs --help\nnode moonice.mjs scan fixtures/deletes.icebundle.json\nnode moonice.mjs scan fixtures/partitioned.icebundle.json --filter-file fixtures/ts-ge-march.filter.json\n```\n\nExpected: two surviving rows in each scan. CLI decodes bounded offline standard-file bundles. No catalog or S3 network client. Apache-2.0.\n\nSource, API, compatibility and provenance: https://github.com/Ridge-Lab/moonice/tree/v0.3.0\n")
+    "# MoonIce CLI 0.3.1\n\nRequires Node.js (validated with Node 24).\n\n```sh\nnode moonice.mjs --help\nnode moonice.mjs scan fixtures/deletes.icebundle.json\nnode moonice.mjs scan fixtures/partitioned.icebundle.json --filter-file fixtures/ts-ge-march.filter.json\n```\n\nExpected: two surviving rows in each scan. CLI decodes bounded offline standard-file bundles. No catalog or S3 network client. Apache-2.0.\n\nSource, API, compatibility and provenance: https://github.com/Ridge-Lab/moonice/tree/v0.3.1\n")
   println("Staged CLI at " + root)
 }

@@ -1,12 +1,14 @@
 ///|
+#derive(Debug, ToJson)
 pub(all) struct FileDecision {
   entry : ManifestEntry
   kept : Bool
   reason_code : String
   explanation : String
-} derive(Debug, ToJson)
+}
 
 ///|
+#derive(Debug, ToJson)
 pub(all) struct ScanPlan {
   snapshot_id : Int64
   schema : Schema
@@ -14,7 +16,7 @@ pub(all) struct ScanPlan {
   decisions : Array[FileDecision]
   retained_bytes : Int64
   pruned_bytes : Int64
-} derive(Debug, ToJson)
+}
 
 ///|
 fn partition_exclusion(

@@ -3,6 +3,7 @@ package "Ridge-Lab/moonice"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -36,22 +37,24 @@ pub fn scan_batches(TableMetadata, SnapshotState, Predicate, (String) -> Bytes r
 
 pub fn scan_rows(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, limit? : Int32) -> ScanResult raise IceError
 
-pub fn transform_partition(Scalar, Json, String) -> Scalar?
+pub fn transform_partition(Scalar, @json.Json, String) -> Scalar?
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror IceError {
   Invalid(String, String, String)
-} derive(@debug.Debug)
+}
 pub fn IceError::output(Self, &Logger) -> Unit
 pub fn IceError::to_repr(Self) -> @debug.Repr
 pub fn IceError::to_string(Self) -> String
 pub impl Show for IceError
 
 // Types and methods
+#derive(@debug.Debug)
 pub(all) struct Bundle {
   metadata : TableMetadata
   files : Map[String, Bytes]
-} derive(@debug.Debug)
+}
 pub fn Bundle::diagnose(Self) -> Diagnosis
 pub fn Bundle::load_snapshot(Self, snapshot_id? : Int64) -> SnapshotState raise IceError
 pub fn Bundle::read_file(Self, String) -> Bytes raise IceError
@@ -59,18 +62,20 @@ pub fn Bundle::scan(Self, Predicate, snapshot_id? : Int64, limit? : Int32) -> Sc
 pub fn Bundle::scan_batches(Self, Predicate, (Array[DataRow]) -> Unit raise IceError, snapshot_id? : Int64, batch_size? : Int32) -> ScanSummary raise IceError
 pub fn Bundle::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) enum CompareOp {
   Eq
   Lt
   Le
   Gt
   Ge
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn CompareOp::equal(Self, Self) -> Bool
 pub fn CompareOp::not_equal(Self, Self) -> Bool
-pub fn CompareOp::to_json(Self) -> Json
+pub fn CompareOp::to_json(Self) -> @json.Json
 pub fn CompareOp::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct DataFile {
   content : Int32
   path : String
@@ -83,75 +88,82 @@ pub(all) struct DataFile {
   null_counts : Map[Int32, Int64]
   nan_counts : Map[Int32, Int64]
   equality_ids : Array[Int32]
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn DataFile::equal(Self, Self) -> Bool
 pub fn DataFile::not_equal(Self, Self) -> Bool
-pub fn DataFile::to_json(Self) -> Json
+pub fn DataFile::to_json(Self) -> @json.Json
 pub fn DataFile::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct DataRow {
   file_path : String
   position : Int64
   values : Map[Int32, Scalar]
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn DataRow::equal(Self, Self) -> Bool
 pub fn DataRow::not_equal(Self, Self) -> Bool
 pub fn DataRow::project(Self, Schema) -> Map[String, Scalar] raise IceError
-pub fn DataRow::to_json(Self) -> Json
+pub fn DataRow::to_json(Self) -> @json.Json
 pub fn DataRow::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct DeleteDecision {
   data_path : String
   delete_path : String
   applies : Bool
   reason_code : String
   explanation : String
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn DeleteDecision::equal(Self, Self) -> Bool
 pub fn DeleteDecision::not_equal(Self, Self) -> Bool
-pub fn DeleteDecision::to_json(Self) -> Json
+pub fn DeleteDecision::to_json(Self) -> @json.Json
 pub fn DeleteDecision::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct Diagnosis {
   checked_snapshots : Int32
   checked_objects : Int32
   findings : Array[Finding]
-} derive(ToJson, @debug.Debug)
-pub fn Diagnosis::to_json(Self) -> Json
+}
+pub fn Diagnosis::to_json(Self) -> @json.Json
 pub fn Diagnosis::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct Field {
   id : Int32
   name : String
   required : Bool
-  field_type : Json
-} derive(Eq, ToJson, @debug.Debug)
+  field_type : @json.Json
+}
 pub fn Field::equal(Self, Self) -> Bool
 pub fn Field::not_equal(Self, Self) -> Bool
-pub fn Field::to_json(Self) -> Json
+pub fn Field::to_json(Self) -> @json.Json
 pub fn Field::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct FileDecision {
   entry : ManifestEntry
   kept : Bool
   reason_code : String
   explanation : String
-} derive(ToJson, @debug.Debug)
-pub fn FileDecision::to_json(Self) -> Json
+}
+pub fn FileDecision::to_json(Self) -> @json.Json
 pub fn FileDecision::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct Finding {
   severity : String
   code : String
   path : String
   explanation : String
   snapshot_id : Int64?
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn Finding::equal(Self, Self) -> Bool
 pub fn Finding::not_equal(Self, Self) -> Bool
-pub fn Finding::to_json(Self) -> Json
+pub fn Finding::to_json(Self) -> @json.Json
 pub fn Finding::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct Manifest {
   path : String
   length : Int64
@@ -160,12 +172,13 @@ pub(all) struct Manifest {
   sequence_number : Int64
   min_sequence_number : Int64
   added_snapshot_id : Int64
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn Manifest::equal(Self, Self) -> Bool
 pub fn Manifest::not_equal(Self, Self) -> Bool
-pub fn Manifest::to_json(Self) -> Json
+pub fn Manifest::to_json(Self) -> @json.Json
 pub fn Manifest::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct ManifestEntry {
   manifest_path : String
   spec_id : Int32
@@ -174,32 +187,35 @@ pub(all) struct ManifestEntry {
   sequence_number : Int64
   file_sequence_number : Int64
   file : DataFile
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn ManifestEntry::equal(Self, Self) -> Bool
 pub fn ManifestEntry::not_equal(Self, Self) -> Bool
-pub fn ManifestEntry::to_json(Self) -> Json
+pub fn ManifestEntry::to_json(Self) -> @json.Json
 pub fn ManifestEntry::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct PartitionField {
   source_id : Int32
   field_id : Int32
   name : String
   transform : String
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn PartitionField::equal(Self, Self) -> Bool
 pub fn PartitionField::not_equal(Self, Self) -> Bool
-pub fn PartitionField::to_json(Self) -> Json
+pub fn PartitionField::to_json(Self) -> @json.Json
 pub fn PartitionField::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct PartitionSpec {
   id : Int32
   fields : Array[PartitionField]
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn PartitionSpec::equal(Self, Self) -> Bool
 pub fn PartitionSpec::not_equal(Self, Self) -> Bool
-pub fn PartitionSpec::to_json(Self) -> Json
+pub fn PartitionSpec::to_json(Self) -> @json.Json
 pub fn PartitionSpec::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) enum Predicate {
   All
   Compare(Int32, CompareOp, Scalar)
@@ -207,14 +223,15 @@ pub(all) enum Predicate {
   NotNull(Int32)
   And(Predicate, Predicate)
   Or(Predicate, Predicate)
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn Predicate::equal(Self, Self) -> Bool
 pub fn Predicate::matches(Self, Map[Int32, Scalar]) -> Bool
 pub fn Predicate::not_equal(Self, Self) -> Bool
-pub fn Predicate::to_json(Self) -> Json
+pub fn Predicate::to_json(Self) -> @json.Json
 pub fn Predicate::to_repr(Self) -> @debug.Repr
 pub fn Predicate::validate(Self, Schema) -> Unit raise IceError
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) enum Scalar {
   Missing
   Boolean(Bool)
@@ -222,13 +239,14 @@ pub(all) enum Scalar {
   Real(Double)
   Text(String)
   Binary(Bytes)
-} derive(Eq, ToJson, @debug.Debug)
-pub fn Scalar::display_json(Self) -> Json
+}
+pub fn Scalar::display_json(Self) -> @json.Json
 pub fn Scalar::equal(Self, Self) -> Bool
 pub fn Scalar::not_equal(Self, Self) -> Bool
-pub fn Scalar::to_json(Self) -> Json
+pub fn Scalar::to_json(Self) -> @json.Json
 pub fn Scalar::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct ScanPlan {
   snapshot_id : Int64
   schema : Schema
@@ -236,10 +254,11 @@ pub(all) struct ScanPlan {
   decisions : Array[FileDecision]
   retained_bytes : Int64
   pruned_bytes : Int64
-} derive(ToJson, @debug.Debug)
-pub fn ScanPlan::to_json(Self) -> Json
+}
+pub fn ScanPlan::to_json(Self) -> @json.Json
 pub fn ScanPlan::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct ScanResult {
   snapshot_id : Int64
   schema : Schema
@@ -248,10 +267,11 @@ pub(all) struct ScanResult {
   deleted_rows : Int32
   matched_rows : Int32
   truncated : Bool
-} derive(ToJson, @debug.Debug)
-pub fn ScanResult::to_json(Self) -> Json
+}
+pub fn ScanResult::to_json(Self) -> @json.Json
 pub fn ScanResult::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct ScanSummary {
   snapshot_id : Int64
   schema : Schema
@@ -260,30 +280,33 @@ pub(all) struct ScanSummary {
   matched_rows : Int32
   scanned_files : Int32
   delete_files : Int32
-} derive(ToJson, @debug.Debug)
-pub fn ScanSummary::to_json(Self) -> Json
+}
+pub fn ScanSummary::to_json(Self) -> @json.Json
 pub fn ScanSummary::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct Schema {
   id : Int32
   fields : Array[Field]
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn Schema::equal(Self, Self) -> Bool
 pub fn Schema::field(Self, Int32) -> Field?
 pub fn Schema::field_named(Self, String) -> Field raise IceError
 pub fn Schema::not_equal(Self, Self) -> Bool
-pub fn Schema::to_json(Self) -> Json
+pub fn Schema::to_json(Self) -> @json.Json
 pub fn Schema::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct SchemaChange {
   field_id : Int32
   kind : String
   before : Field?
   after : Field?
-} derive(ToJson, @debug.Debug)
-pub fn SchemaChange::to_json(Self) -> Json
+}
+pub fn SchemaChange::to_json(Self) -> @json.Json
 pub fn SchemaChange::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct Snapshot {
   id : Int64
   parent_id : Int64?
@@ -292,12 +315,13 @@ pub(all) struct Snapshot {
   manifest_list : String
   schema_id : Int32?
   operation : String
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn Snapshot::equal(Self, Self) -> Bool
 pub fn Snapshot::not_equal(Self, Self) -> Bool
-pub fn Snapshot::to_json(Self) -> Json
+pub fn Snapshot::to_json(Self) -> @json.Json
 pub fn Snapshot::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct SnapshotDiff {
   from_id : Int64
   to_id : Int64
@@ -307,29 +331,32 @@ pub(all) struct SnapshotDiff {
   added_records : Int64
   removed_records : Int64
   schema_changes : Array[SchemaChange]
-} derive(ToJson, @debug.Debug)
-pub fn SnapshotDiff::to_json(Self) -> Json
+}
+pub fn SnapshotDiff::to_json(Self) -> @json.Json
 pub fn SnapshotDiff::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) struct SnapshotRef {
   name : String
   snapshot_id : Int64
   kind : String
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn SnapshotRef::equal(Self, Self) -> Bool
 pub fn SnapshotRef::not_equal(Self, Self) -> Bool
-pub fn SnapshotRef::to_json(Self) -> Json
+pub fn SnapshotRef::to_json(Self) -> @json.Json
 pub fn SnapshotRef::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct SnapshotState {
   snapshot : Snapshot
   schema : Schema
   manifests : Array[Manifest]
   entries : Array[ManifestEntry]
-} derive(ToJson, @debug.Debug)
-pub fn SnapshotState::to_json(Self) -> Json
+}
+pub fn SnapshotState::to_json(Self) -> @json.Json
 pub fn SnapshotState::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct TableMetadata {
   uuid : String
   location : String
@@ -341,10 +368,10 @@ pub(all) struct TableMetadata {
   partition_specs : Array[PartitionSpec]
   snapshots : Array[Snapshot]
   refs : Array[SnapshotRef]
-} derive(ToJson, @debug.Debug)
+}
 pub fn TableMetadata::schema(Self, Int32) -> Schema raise IceError
 pub fn TableMetadata::snapshot(Self, id? : Int64, ref_name? : String) -> Snapshot raise IceError
-pub fn TableMetadata::to_json(Self) -> Json
+pub fn TableMetadata::to_json(Self) -> @json.Json
 pub fn TableMetadata::to_repr(Self) -> @debug.Repr
 
 // Type aliases

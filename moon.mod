@@ -11,7 +11,7 @@
 
 name = "Ridge-Lab/moonice"
 
-version = "0.3.0"
+version = "0.3.1"
 
 readme = "README.md"
 
@@ -29,7 +29,7 @@ import {
   "mizchi/parquet@0.2.2",
   "yugonlian/moon-avro@0.3.0",
   "moonbitlang/x@0.5.7",
-  // Pin transitive tooling to manifests accepted by MoonBit 0.10.16.
+  // Pin transitive tooling to versions with supported module manifests.
   "moonbitlang/quickcheck@0.15.1",
   "mizchi/duckdb@0.6.6",
 }

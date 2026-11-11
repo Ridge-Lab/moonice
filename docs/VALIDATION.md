@@ -1,5 +1,13 @@
 # Validation record
 
+## 0.3.1 — 2026-11-11
+
+MoonBit compiler/core `0.10.20+65efd5b93` accepts the 23 migrated `#derive` declarations under `--deny-warn`. The exported interface has the same 111 public function signatures after qualifying the standard JSON type. The CLI and browser distribution include the NOTICE from that SDK.
+
+The full local verification on JS, Wasm and Wasm GC passed all 29 commands. Each backend passed 50 tests, built release artifacts and ran both library examples. The MoonFrame 0.8.1 example produced two visible rows with an ID sum of six on all three backends. PyIceberg and PyArrow matched 1,377 partition-transform cases, eight Parquet samples and the file selections and row IDs for all four scans. The packaged CLI ran successfully and its six license files matched the source copies byte-for-byte.
+
+As a separate upgrade check, a fresh registry consumer resolved published MoonIce 0.3.0 and passed its row, deletion and integer-bound assertions on JS, Wasm and Wasm GC using 0.10.20. The v0.3.0 source tag retains the syntax accepted by 0.10.16.
+
 ## 0.3.0 — 2026-11-10 (local source; publication tracked separately)
 
 Compiler/core: `moonc v0.10.16+b1a0e846e`; Node 24.14.1; Python 3.12.10.

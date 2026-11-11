@@ -22,7 +22,7 @@ the implementation.
 These remain dependencies, rather than being presented as MoonIce implementation
 work. Their transitive dependencies and licenses remain applicable.
 
-The pinned MoonBit core `0.10.16+b1a0e846e` includes additional upstream
+The pinned MoonBit core `0.10.20+65efd5b93` includes additional upstream
 attributions and license terms in its `NOTICE`. The repository preserves its
 original [LICENSE](../licenses/moonbit-core-LICENSE) and
 [NOTICE](../licenses/moonbit-core-NOTICE) byte-for-byte. Both files are copied
@@ -50,7 +50,7 @@ NONE/Snappy from rejected Gzip/Zstd. The partition calendar and Murmur3 code
 implement the documented Iceberg transform rules; they are not translated
 PyIceberg source. The Python oracle is not shipped as the reader implementation.
 
-`integrations/moonframe` depends on ihb2032/MoonFrame 0.8.0 (Apache-2.0), solely
+`integrations/moonframe` depends on ihb2032/MoonFrame 0.8.1 (Apache-2.0), solely
 for a typed-column consumer demonstration. MoonFrame is not included in the
 core module's runtime dependencies or compiled web/CLI distributions. This
 example does not imply endorsement or adoption by its maintainers.

@@ -4,7 +4,7 @@
 
 从标准 `metadata.json → manifest list → manifest → Parquet` 追踪一次读取：哪些文件参与扫描、哪些被排除、为什么删除文件会影响某些数据、字段改名后旧文件如何读取。核心表语义使用 MoonBit 实现；命令行和浏览器工作台共用同一套 API。
 
-这是可运行的 **0.3.0 有界实现**，使用 MoonBit 0.10.16。支持范围见 [兼容性说明](docs/COMPATIBILITY.md)，不代表完整 Iceberg 引擎或生产级数据湖服务。
+这是可运行的 **0.3.1 有界实现**，使用 MoonBit 0.10.20。支持范围见 [兼容性说明](docs/COMPATIBILITY.md)，不代表完整 Iceberg 引擎或生产级数据湖服务。
 
 [在线体验](https://ridge-lab.github.io/moonice/) · [构建与测试记录](https://github.com/Ridge-Lab/moonice/actions/workflows/ci.yml) · [API 示例](README.mbt.md)
 
@@ -28,19 +28,19 @@ moon run --target js examples/library_read
 
 ## 五分钟运行
 
-先按 [MoonBit 安装说明](https://docs.moonbitlang.com/en/latest/quickstart.html)安装工具链。最低要求为 **moonc 0.10.16**；本版本与 CI 固定验证 `moonc v0.10.16+b1a0e846e`（对应 core 同版本）。使用其他更新版本时，请先运行完整检查。JS 示例需要 Node.js（验证版本 24），native 需要 C 编译器；Python 3.12 用于统一验证入口及独立参考工具；库和 CLI 运行不需要 Python。
+先按 [MoonBit 安装说明](https://docs.moonbitlang.com/en/latest/quickstart.html)安装工具链。本版本及 CI 使用 **moonc 0.10.20+65efd5b93** 和同版本 core。继续使用 0.10.16 的开发者可安装 `Ridge-Lab/moonice@0.3.0` 或检出 `v0.3.0` 标签。使用其他更新版本时，请先运行完整检查。JS 示例需要 Node.js（验证版本 24），native 需要 C 编译器；Python 3.12 用于统一验证入口及独立参考工具；库和 CLI 运行不需要 Python。
 
 在现有 MoonBit 项目中安装库：
 
 ```sh
 moon update
-moon add Ridge-Lab/moonice@0.3.0
+moon add Ridge-Lab/moonice@0.3.1
 ```
 
 在调用方 `moon.pkg` 中加入 `import { "Ridge-Lab/moonice" @ice }`，使用[可执行 API 示例](README.mbt.md)。运行本仓库的完整示例：
 
 ```sh
-git clone --branch v0.3.0 https://github.com/Ridge-Lab/moonice.git
+git clone --branch v0.3.1 https://github.com/Ridge-Lab/moonice.git
 cd moonice
 moon version --all
 moon update
@@ -139,7 +139,7 @@ python scripts/verify.py --profile quick --targets js wasm wasm-gc
 python -m pip install -r tools/requirements-reference.txt
 python scripts/verify.py --profile full --targets js wasm wasm-gc native
 # 发布到Mooncakes后，在没有本地替换的新消费者中验证
-python scripts/verify.py --profile release --version 0.3.0 --targets js wasm wasm-gc native
+python scripts/verify.py --profile release --version 0.3.1 --targets js wasm wasm-gc native
 ```
 
 完整验证使用种子 `20261110` 的 1377 个变换对照、新建分区演进表的四次扫描，以及空表/多行组/字典/数据页V1和V2的8个PyArrow文件。生成数据只放在本次运行目录，不改冻结样本。`full` 缺少参考依赖会失败，不伪装成已通过。native 需要可用的 C 工具链，Windows CI 配置 MSVC。工具的故障契约也有回归：子进程失败、工具缺失、产物缺失和依赖失败都不能产生成功报告。详见[验证记录](docs/VALIDATION.md)。

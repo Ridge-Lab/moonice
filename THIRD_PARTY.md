@@ -11,7 +11,7 @@ attribution and license terms reproduced there.
 
 | Component | Version | Purpose and source |
 |---|---|---|
-| MoonBit core | 0.10.16+b1a0e846e | Standard library, [moonbitlang/core](https://github.com/moonbitlang/core) |
+| MoonBit core | 0.10.20+65efd5b93 | Standard library, [moonbitlang/core](https://github.com/moonbitlang/core) |
 | moonbitlang/x | 0.5.7 | Filesystem support used by the Parquet package and CLI, [moonbitlang/x](https://github.com/moonbitlang/x) |
 | yugonlian/moon-avro | 0.3.0 | Avro container decoding, [moon-avro](https://github.com/yugonlian/moon-avro) |
 | Milky2018/moon_yazi | 0.1.3 | DEFLATE support for Avro, [moon_yazi](https://github.com/moonbit-community/moon_yazi) |
@@ -27,7 +27,7 @@ libraries are not included in the browser executable. See the source repository'
 `docs/PROVENANCE.md` for implementation and reference-data provenance.
 
 The core license and notice files are copied byte-for-byte from the pinned
-`0.10.16+b1a0e846e` SDK's `lib/core/`. When changing the toolchain, refresh both
+`0.10.20+65efd5b93` SDK's `lib/core/`. When changing the toolchain, refresh both
 files from the matching SDK and retain them in browser and CLI archives.
 
 `scripts/verify.py` and its harness-contract tests adapt the maintainer's

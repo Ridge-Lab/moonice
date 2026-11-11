@@ -1,18 +1,20 @@
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct Finding {
   severity : String
   code : String
   path : String
   explanation : String
   snapshot_id : Int64?
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, ToJson)
 pub(all) struct Diagnosis {
   checked_snapshots : Int32
   checked_objects : Int32
   findings : Array[Finding]
-} derive(Debug, ToJson)
+}
 
 ///|
 /// Inspect every retained snapshot. Failures are localized; other snapshots are
@@ -118,14 +120,16 @@ pub fn Bundle::diagnose(self : Bundle) -> Diagnosis {
 }
 
 ///|
+#derive(Debug, ToJson)
 pub(all) struct SchemaChange {
   field_id : Int32
   kind : String
   before : Field?
   after : Field?
-} derive(Debug, ToJson)
+}
 
 ///|
+#derive(Debug, ToJson)
 pub(all) struct SnapshotDiff {
   from_id : Int64
   to_id : Int64
@@ -135,7 +139,7 @@ pub(all) struct SnapshotDiff {
   added_records : Int64
   removed_records : Int64
   schema_changes : Array[SchemaChange]
-} derive(Debug, ToJson)
+}
 
 ///|
 /// Physical file/record changes, not a logical row-level changelog. Rewrites may

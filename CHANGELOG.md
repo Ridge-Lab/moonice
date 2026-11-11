@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — 2026-11-11
+
+- Adopt MoonBit compiler/core 0.10.20 and its `#derive` syntax. The v0.3.0 tag retains the 0.10.16 source and package.
+- Exercise MoonFrame 0.8.1 with typed Int64 and null transfer on the current SDK.
+- Ship the updated core NOTICE from the SDK used to compile the CLI and browser assets.
+
 ## 0.3.0 — 2026-11-10
 
 - Upgrade the compiler/core floor to 0.10.16 and resolve compatible public dependencies without modifying caches.

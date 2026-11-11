@@ -1,17 +1,19 @@
 ///|
 /// An offline transport for standard Iceberg bytes, not a replacement table format.
+#derive(Debug)
 pub(all) struct Bundle {
   metadata : TableMetadata
   files : Map[String, Bytes]
-} derive(Debug)
+}
 
 ///|
+#derive(Debug, ToJson)
 pub(all) struct SnapshotState {
   snapshot : Snapshot
   schema : Schema
   manifests : Array[Manifest]
   entries : Array[ManifestEntry]
-} derive(Debug, ToJson)
+}
 
 ///|
 /// Open an offline bundle. Raw metadata is a string to preserve 64-bit JSON IDs

@@ -1,6 +1,6 @@
 # Compatibility and boundaries
 
-MoonIce 0.3.0 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
+MoonIce 0.3.1 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
 
 | Surface | Current behavior |
 |---|---|
@@ -29,7 +29,8 @@ MoonIce 0.3.0 is a bounded Iceberg v2 reader/inspector, not a complete standards
 The core and optional MoonFrame consumer use the same pinned toolchain and
 dependency versions. Their JS/Wasm/Wasm GC/native jobs are defined in CI; actual
 results are recorded in [validation](ACCEPTANCE.md). The current dependency graph is resolved from published versions without cache patches.
-The optional MoonFrame example pins 0.8.0 for the declared 0.10.16 compiler.
+MoonIce 0.3.1 uses compiler/core 0.10.20 and the optional MoonFrame 0.8.1 example.
+For compiler/core 0.10.16, use the v0.3.0 tag or Mooncakes package 0.3.0.
 
 Independent PyArrow fixtures verify NONE and Snappy compression with dictionary
 encoding, multiple row groups, nulls and exact Int64. Gzip and Zstd fixtures return

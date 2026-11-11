@@ -1,5 +1,6 @@
 ///|
 /// Counters for a complete scan. Unlike ScanResult this contains no row array.
+#derive(Debug, ToJson)
 pub(all) struct ScanSummary {
   snapshot_id : Int64
   schema : Schema
@@ -8,7 +9,7 @@ pub(all) struct ScanSummary {
   matched_rows : Int32
   scanned_files : Int32
   delete_files : Int32
-} derive(Debug, ToJson)
+}
 
 ///|
 /// Emit matching rows in batches, after deletes and schema validation.

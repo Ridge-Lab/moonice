@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) enum Scalar {
   Missing
   Boolean(Bool)
@@ -6,9 +7,10 @@ pub(all) enum Scalar {
   Real(Double)
   Text(String)
   Binary(Bytes)
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct Manifest {
   path : String
   length : Int64
@@ -17,10 +19,11 @@ pub(all) struct Manifest {
   sequence_number : Int64
   min_sequence_number : Int64
   added_snapshot_id : Int64
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
 /// File content: 0=data, 1=position deletes, 2=equality deletes.
+#derive(Debug, Eq, ToJson)
 pub(all) struct DataFile {
   content : Int32
   path : String
@@ -33,10 +36,11 @@ pub(all) struct DataFile {
   null_counts : Map[Int32, Int64]
   nan_counts : Map[Int32, Int64]
   equality_ids : Array[Int32]
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
 /// Status: 0=existing, 1=added, 2=deleted. Sequence inheritance is resolved.
+#derive(Debug, Eq, ToJson)
 pub(all) struct ManifestEntry {
   manifest_path : String
   spec_id : Int32
@@ -45,4 +49,4 @@ pub(all) struct ManifestEntry {
   sequence_number : Int64
   file_sequence_number : Int64
   file : DataFile
-} derive(Debug, Eq, ToJson)
+}

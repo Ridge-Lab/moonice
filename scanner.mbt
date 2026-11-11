@@ -1,4 +1,5 @@
 ///|
+#derive(Debug, ToJson)
 pub(all) struct ScanResult {
   snapshot_id : Int64
   schema : Schema
@@ -7,7 +8,7 @@ pub(all) struct ScanResult {
   deleted_rows : Int32
   matched_rows : Int32
   truncated : Bool
-} derive(Debug, ToJson)
+}
 
 ///|
 fn equality_key(

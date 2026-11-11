@@ -59,7 +59,7 @@ visible_rows=2
 创建普通 MoonBit 项目，执行：
 
 ```sh
-moon add Ridge-Lab/moonice@0.3.0
+moon add Ridge-Lab/moonice@0.3.1
 moon add moonbitlang/x@0.5.7
 ```
 

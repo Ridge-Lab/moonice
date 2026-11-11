@@ -1,14 +1,16 @@
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) enum CompareOp {
   Eq
   Lt
   Le
   Gt
   Ge
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
 /// Predicates bind to stable field IDs. Missing values never satisfy comparisons.
+#derive(Debug, Eq, ToJson)
 pub(all) enum Predicate {
   All
   Compare(Int32, CompareOp, Scalar)
@@ -16,7 +18,7 @@ pub(all) enum Predicate {
   NotNull(Int32)
   And(Predicate, Predicate)
   Or(Predicate, Predicate)
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
 fn scalar_compare(a : Scalar, b : Scalar) -> Int32? {

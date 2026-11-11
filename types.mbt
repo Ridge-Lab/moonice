@@ -1,8 +1,9 @@
 ///|
 /// A rejected input, with a stable machine-readable code and source path.
+#derive(Debug)
 pub(all) suberror IceError {
   Invalid(String, String, String)
-} derive(Debug)
+}
 
 ///|
 pub impl Show for IceError with fn output(self, logger) {
@@ -13,34 +14,39 @@ pub impl Show for IceError with fn output(self, logger) {
 }
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct Field {
   id : Int32
   name : String
   required : Bool
   field_type : Json
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct Schema {
   id : Int32
   fields : Array[Field]
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct PartitionField {
   source_id : Int32
   field_id : Int32
   name : String
   transform : String
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct PartitionSpec {
   id : Int32
   fields : Array[PartitionField]
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct Snapshot {
   id : Int64
   parent_id : Int64?
@@ -49,17 +55,19 @@ pub(all) struct Snapshot {
   manifest_list : String
   schema_id : Int32?
   operation : String
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct SnapshotRef {
   name : String
   snapshot_id : Int64
   kind : String
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
 /// Parsed Iceberg v2 metadata. IDs remain signed 64-bit integers on every target.
+#derive(Debug, ToJson)
 pub(all) struct TableMetadata {
   uuid : String
   location : String
@@ -71,7 +79,7 @@ pub(all) struct TableMetadata {
   partition_specs : Array[PartitionSpec]
   snapshots : Array[Snapshot]
   refs : Array[SnapshotRef]
-} derive(Debug, ToJson)
+}
 
 ///|
 pub fn TableMetadata::schema(

@@ -1,11 +1,12 @@
 ///|
+#derive(Debug, Eq, ToJson)
 pub(all) struct DeleteDecision {
   data_path : String
   delete_path : String
   applies : Bool
   reason_code : String
   explanation : String
-} derive(Debug, Eq, ToJson)
+}
 
 ///|
 fn same_partition(a : ManifestEntry, b : ManifestEntry) -> Bool {
