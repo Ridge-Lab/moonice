@@ -1,4 +1,6 @@
-import { "moonbitlang/x/fs" }
+----
+import { "moonbitlang/x@0.5.7/fs" }
+----
 
 // Run after `moon build --release --target js`. Archives are made from this
 // explicit staging tree, never from caches, credentials or the whole workspace.

@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Local build commands for the MoonBit MoonIce inspector",
   "scripts": {
-    "build": "moon build --release --target js && moon run tools/prepare_web.mbtx",
+    "build": "moon build --release --target js --deny-warn && moon run --deny-warn tools/prepare_web.mbtx",
     "test": "moon test --target wasm && moon test --target js && moon test --target wasm-gc",
     "cli": "moon run --target js cmd/main --"
   }

@@ -151,8 +151,8 @@ class Verification:
         if "js" not in args.targets:
             self.task("build-js", [moon, "build", "--target", "js", "--release", "--deny-warn"], requires=("moon-version",))
         host = ("build-js", "node-version")
-        self.task("web-build", [moon, "run", "tools/prepare_web.mbtx"], requires=host)
-        self.task("cli-build", [moon, "run", "tools/prepare_release.mbtx"], requires=host)
+        self.task("web-build", [moon, "run", "--deny-warn", "tools/prepare_web.mbtx"], requires=host)
+        self.task("cli-build", [moon, "run", "--deny-warn", "tools/prepare_release.mbtx"], requires=host)
         distribution = self.directory / "distribution.json"
         self.task("distribution", [sys.executable, "scripts/verify_distribution.py", "--node", node, "--output", str(distribution)],
                   requires=("web-build", "cli-build"), artifacts=(distribution,))

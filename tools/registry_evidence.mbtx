@@ -1,4 +1,6 @@
-import { "moonbitlang/x/fs", "moonbitlang/core/json" }
+----
+import { "moonbitlang/x@0.5.7/fs", "moonbitlang/core/json" }
+----
 
 // Run from the repository root after downloading the public registry response.
 // This filters metadata only; it does not assert source-code uniqueness.
