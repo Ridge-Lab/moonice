@@ -50,7 +50,7 @@ visible_rows=2
 
 0.2.0 的 [MoonFrame 接入示例](../integrations/moonframe/)是独立消费者模块，使用两者的公开 API。MoonIce 的 `scan_batches` 先解释快照、处理删除，再将有效行按 Int64/可空字符串交给 MoonFrame。后者只需负责 DataFrame 和聚合：最终两行 ID 为 4、2，合计 6。示例还核对 `9007199254740993` 无损进入 Series，避免把数据经 JavaScript 浮点 JSON 中转。
 
-另一个[批次读取示例](../examples/batch_read/main.mbt)读取 PyIceberg 生成的分区演进表：旧数据按天、新数据按月。调用方只提供时间条件，不必把条件手写成两套目录规则。MoonIce 按各 manifest 的规格排除四份文件，回调得到两行、ID 合计 21。这说明复用的是表规则，而不是又写了一套 Avro/Parquet 解码器。
+[批次读取示例](../examples/batch_read/main.mbt)使用 PyIceberg 生成的表，旧分区按天，新分区按月。运行 `moon run --target js examples/batch_read`，示例在同一快照上比较全表读取后筛选与先按分区裁剪再筛选。两个路径均得到 ID 10 和 11。对象读取回调实测，全表打开 6 份数据文件、返回 7,592 字节；按 2024 年 3 月 1 日的时间条件裁剪后只打开 2 份、返回 2,568 字节。计数从快照元数据和 manifest 加载完成后开始，衡量这个离线样例的文件访问量。CI 核对两组 ID、文件打开次数和返回字节数的减少。
 
 这两项验证增强了工程用途证据，但仍不等于已获得外部需求或采用；目前适用于需要读取、检查和组合表语义的 MoonBit 工具开发者。
 
@@ -59,7 +59,7 @@ visible_rows=2
 创建普通 MoonBit 项目，执行：
 
 ```sh
-moon add Ridge-Lab/moonice@0.3.1
+moon add Ridge-Lab/moonice@0.3.2
 moon add moonbitlang/x@0.5.7
 ```
 

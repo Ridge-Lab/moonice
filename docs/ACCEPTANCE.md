@@ -1,6 +1,6 @@
-# MoonIce 0.3.1 维护验证
+# MoonIce 0.3.2 维护验证
 
-0.3.1 使用 moonc/core `0.10.20+65efd5b93`，MoonFrame 示例使用 0.8.1。下方的 0.3.0 记录保留对应版本的复现环境。当前维护检查见[验证记录](VALIDATION.md)，远端结果见[CI](https://github.com/Ridge-Lab/moonice/actions/workflows/ci.yml)。
+0.3.2 使用 moonc/core `0.10.20+65efd5b93`，MoonFrame 示例使用 0.8.1。下方的 0.3.0 记录保留对应版本的复现环境。当前维护检查见[验证记录](VALIDATION.md)，远端结果见[CI](https://github.com/Ridge-Lab/moonice/actions/workflows/ci.yml)。
 
 ## MoonIce 0.3.0 版本验证记录
 

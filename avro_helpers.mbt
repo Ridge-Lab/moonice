@@ -122,10 +122,13 @@ fn count_metrics(
 }
 
 ///|
-fn container_records(
+fn[T] map_container(
   data : Bytes,
   path : String,
-) -> Array[@avro_codec.Datum] raise IceError {
+  project : (@avro_codec.Datum) -> T raise IceError,
+  check_header~ : (@avro.OcfHeader) -> Unit raise IceError = _ => (),
+  decoded_budget~ : Int32 = 64 * 1048576,
+) -> Array[T] raise IceError {
   if data.length() > 64 * 1024 * 1024 {
     raise Invalid(
       "RESOURCE_LIMIT", path, "A manifest container must not exceed 64 MiB",
@@ -137,8 +140,6 @@ fn container_records(
     max_block_bytes: 8 * 1048576,
     max_records_per_block: 100000,
   }
-  // OCF's per-block limit does not bound the total record allocation. Check
-  // every block envelope before decode_container materializes any records.
   let (header, offset) = @avro.decode_header(data, limits~) catch {
     @avro.OcfError::UnsupportedCodec(codec) =>
       raise Invalid(
@@ -148,30 +149,106 @@ fn container_records(
       )
     err => raise Invalid("INVALID_AVRO", path, "\{Repr(err)}")
   }
-  preflight_avro_blocks(data, offset, header.sync_marker(), path)
-  let (_, rows) = @avro.decode_container(data, limits~) catch {
-    @avro.OcfError::UnsupportedCodec(codec) =>
-      raise Invalid(
-        "UNSUPPORTED_AVRO_CODEC",
-        path,
-        "Unsupported Avro codec: \{codec}",
-      )
-    err => raise Invalid("INVALID_AVRO", path, "\{Repr(err)}")
-  }
-  if rows.length() > 1000000 {
-    raise Invalid(
-      "RESOURCE_LIMIT", path, "A manifest container must not exceed one million entries",
-    )
-  }
+  check_header(header)
+  let sync = header.sync_marker()
+  // Validate every envelope before expanding any block. Walk a second time
+  // without retaining an offset table proportional to the number of blocks.
+  visit_avro_blocks(data, offset, sync, path)
+  let rows : Array[T] = []
+  let mut remaining = decoded_budget
+  visit_avro_blocks(data, offset, sync, path, visit=(encoded, count) => {
+    let limit = remaining.min(limits.max_block_bytes)
+    let payload = decode_avro_block(header.codec(), encoded, limit, path)
+    remaining -= payload.length()
+    let decoder = @avro_codec.Decoder::new(
+      payload,
+      limits=@avro_codec.CodecLimits::new(
+        max_bytes=payload.length(),
+        max_collection_items=limits.max_records_per_block,
+      ),
+    ) catch {
+      err => raise Invalid("INVALID_AVRO", path, "\{Repr(err)}")
+    }
+    for _ in 0..<count {
+      let datum = @avro_codec.decode_from(header.schema(), decoder) catch {
+        err => raise Invalid("INVALID_AVRO", path, "\{Repr(err)}")
+      }
+      rows.push(project(datum))
+    }
+    decoder.ensure_finished() catch {
+      err => raise Invalid("INVALID_AVRO", path, "\{Repr(err)}")
+    }
+  })
   rows
 }
 
 ///|
-fn preflight_avro_blocks(
+fn decode_avro_block(
+  codec : @avro.CompressionCodec,
+  encoded : BytesView,
+  limit : Int32,
+  path : String,
+) -> Bytes raise IceError {
+  match codec {
+    Null => {
+      if encoded.length() > limit {
+        raise Invalid(
+          "RESOURCE_LIMIT", path, "Manifest decoded byte budget exceeded",
+        )
+      }
+      encoded.to_owned()
+    }
+    Deflate => {
+      // Count with fixed decode scratch first. A rejected stream never gets
+      // an output allocation proportional to its declared or decoded length.
+      let output = @flate.inflate_prefix(
+        encoded,
+        max_output=limit,
+        two_pass=true,
+      ) catch {
+        @flate.InflateError(@flate.OutputLimitExceeded(_), _) =>
+          raise Invalid(
+            "RESOURCE_LIMIT", path, "Manifest decoded byte budget exceeded",
+          )
+        @flate.InflateError(_, message) =>
+          raise Invalid("INVALID_AVRO", path, message)
+      }
+      let tail = encoded[output.consumed:]
+      if !tail.is_empty() && !fastavro_checksum_prefix(tail, output.data) {
+        raise Invalid(
+          "INVALID_AVRO", path, "Trailing bytes after DEFLATE stream",
+        )
+      }
+      output.data
+    }
+  }
+}
+
+///|
+// fastavro 1.12.2's writer can leave the first three big-endian Adler-32
+// bytes after a raw stream (zlib.compress(payload)[2:-1]).
+fn fastavro_checksum_prefix(tail : BytesView, payload : Bytes) -> Bool {
+  if tail.length() != 3 {
+    return false
+  }
+  let mut a = 1
+  let mut b = 0
+  for byte in payload {
+    a = (a + byte.to_int()) % 65521
+    b = (b + a) % 65521
+  }
+  tail[0].to_int() == b >> 8 &&
+  tail[1].to_int() == (b & 255) &&
+  tail[2].to_int() == a >> 8
+}
+
+///|
+fn visit_avro_blocks(
   data : Bytes,
   offset : Int32,
   sync : Bytes,
   path : String,
+  visit~ : (BytesView, Int32) -> Unit raise IceError = (_, _) => (),
 ) -> Unit raise IceError {
   // Avro long and compact i64 share zigzag varints. Advance past payloads
   // without copying them; translate reader errors into the Avro context.
@@ -203,10 +280,12 @@ fn preflight_avro_blocks(
       length > (data.length() - reader.offset - 16).to_int64() {
       raise Invalid("INVALID_AVRO", path, "Truncated manifest block")
     }
+    let start = reader.offset
     reader.offset += length.to_int()
     if data[reader.offset:reader.offset + 16] != sync {
       raise Invalid("INVALID_AVRO", path, "Manifest block sync mismatch")
     }
+    visit(data[start:reader.offset], count.to_int())
     reader.offset += 16
   }
 }

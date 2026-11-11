@@ -1,5 +1,11 @@
 # Validation record
 
+## 0.3.2 — 2026-11-11
+
+The 0.3.1 reader failed two regressions through `decode_manifest_list`. A valid block expanding to 8 MiB + 1 returned `INVALID_AVRO` after expansion. Appending three arbitrary bytes to a valid raw stream yielded a successful manifest. The live oracle now requires `RESOURCE_LIMIT` and `INVALID_AVRO` respectively. It also checks the exact 8 MiB boundary, truncated streams, extra datum bytes, sync markers, multi-block files from both fastavro writers and a snapshot ID larger than 2⁵³. The cumulative-budget test uses two one-byte datums so it exercises an overrun on the second block without a large allocation.
+
+The full verifier regenerates ten Avro cases with fastavro 1.12.2 and zlib, alongside the 1,377 PyIceberg transforms, eight Parquet files and four table scans. The batch example compares the exact surviving IDs while counting data-file reads and byte lengths at the callback. The source and published-consumer results are available in [GitHub Actions](https://github.com/Ridge-Lab/moonice/actions).
+
 ## 0.3.1 — 2026-11-11
 
 MoonBit compiler/core `0.10.20+65efd5b93` accepts the 23 migrated `#derive` declarations under `--deny-warn`. The exported interface has the same 111 public function signatures after qualifying the standard JSON type. The CLI and browser distribution include the NOTICE from that SDK.

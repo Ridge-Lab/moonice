@@ -41,12 +41,37 @@ test "Avro total block budget is checked without allocating records" {
     encoder.write_long(0L)
     encoder.write_raw(sync[:])
   }
-  try
-    preflight_avro_blocks(encoder.to_bytes(), 0, sync, "memory://limits")
-  catch {
+  try visit_avro_blocks(encoder.to_bytes(), 0, sync, "memory://limits") catch {
     Invalid(code, _, _) => assert_eq(code, "RESOURCE_LIMIT")
   } noraise {
     _ => fail("Cumulative OCF record budget was ignored")
+  }
+}
+
+///|
+test "OCF decoded byte budget spans blocks and accepts its exact boundary" {
+  // fastavro 1.12.2 wrote two single-datum blocks with an Avro long each.
+  let sync = b"0123456789abcdef"
+  let magic = b"Obj\x01\x04\x14avro.codec"
+  let schema = b"\x16avro.schema\x0c\"long\"\x00"
+  for
+    (codec, first, second) in [
+      (b"\x08null", b"\x02\x02\x0e", b"\x02\x02\x10"),
+      (
+        b"\x0edeflate", b"\x02\x0c\xe3\x03\x00\x00\x0f\x00", b"\x02\x0c\x13\x00\x00\x00\x11\x00",
+      ),
+    ] {
+    let file = magic + codec + schema + sync + first + sync + second + sync
+    fn long(d : @avro_codec.Datum) -> Int64 raise IceError {
+      avro_long(d, "long")
+    }
+    assert_eq(map_container(file, "test", long, decoded_budget=2), [7L, 8L])
+    try map_container(file, "test", long, decoded_budget=1) catch {
+      Invalid(code, _, _) => assert_eq(code, "RESOURCE_LIMIT")
+    } noraise {
+      _ =>
+        fail("Second block was allowed to exceed the remaining decoded bytes")
+    }
   }
 }
 

@@ -1,13 +1,13 @@
 # Compatibility and boundaries
 
-MoonIce 0.3.1 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
+MoonIce 0.3.2 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
 
 | Surface | Current behavior |
 |---|---|
 | Table metadata | v2 only; schemas, partition specs, snapshots, current snapshot, branches/tags, retained ancestry checks |
 | v1 upgraded tables | v1 manifests are not supported, even inside a v2 table |
 | v3/v4 | Rejected, including deletion vectors, row lineage and newer types |
-| Avro containers | Existing `yugonlian/moon-avro` decoder; null/deflate codecs; header version/spec/content checked |
+| Avro containers | `yugonlian/moon-avro` schema/header and datum decoding, null/deflate blocks, bounded output via MoonBit core flate, manifest version/spec/content checks |
 | Manifest entries | Existing/added/deleted status; null sequence inheritance only for added entries; deleted entries excluded |
 | File statistics | Integer/date/time/timestamp, string, boolean, binary and double bounds; float/unsupported bounds retain files |
 | Null / NaN | Null counts used conservatively; float/double bounds do not prune when NaN counts are unknown/nonzero; no NaN literal filters |
@@ -29,7 +29,7 @@ MoonIce 0.3.1 is a bounded Iceberg v2 reader/inspector, not a complete standards
 The core and optional MoonFrame consumer use the same pinned toolchain and
 dependency versions. Their JS/Wasm/Wasm GC/native jobs are defined in CI; actual
 results are recorded in [validation](ACCEPTANCE.md). The current dependency graph is resolved from published versions without cache patches.
-MoonIce 0.3.1 uses compiler/core 0.10.20 and the optional MoonFrame 0.8.1 example.
+MoonIce 0.3.2 uses compiler/core 0.10.20 and the optional MoonFrame 0.8.1 example.
 For compiler/core 0.10.16, use the v0.3.0 tag or Mooncakes package 0.3.0.
 
 Independent PyArrow fixtures verify NONE and Snappy compression with dictionary
@@ -48,12 +48,14 @@ original row predicate after decoding; missing metrics are not proof of exclusio
 
 - Offline bundle: at most 10,000 objects, 64 MiB per decoded object, 128 MiB decoded in total; JSON length also bounded.
 - Raw metadata: at most 8 MiB of string code units.
-- Manifest OCF: 64 MiB input, 1 MiB header metadata, 8 MiB compressed block bytes (preflight) and decoded block bytes (post-decompression), 100,000 records per block, one million entries counted across all blocks before datum materialization; one million live entries across a loaded snapshot.
+- Manifest OCF: 64 MiB input, 1 MiB header metadata, 8 MiB encoded and decoded bytes per block, 64 MiB decoded bytes across the container, 100,000 records per block and one million records per container. Check all block envelopes and sync markers first. For DEFLATE, count output against the remaining byte budget before allocating an output buffer. A size overrun returns `RESOURCE_LIMIT`. Up to one million live entries may be retained across a snapshot.
 - Parquet: 64 MiB input, 8 MiB footer, 100,000 rows and five million materialized cells per file; compact footer and page-header depth 32 / nodes 100,000 each. Before page decoding, validate row-group/column/page counts, byte ranges, overlaps and a cumulative 64 MiB declared uncompressed-page/header budget. Cross-file column chunks and unknown page types fail explicitly.
 - Scan: one million data rows and 100,000 distinct delete rows; output limit 0–100,000, default 1,000.
 - Predicate depth: 64.
 
-These guards limit ordinary oversized inputs; they are not a complete hostile-input sandbox. These are format and allocation-dimension budgets, not an exact process-RSS ceiling. Underlying codecs allocate decoded structures. Avro DEFLATE still decompresses a block before the dependency checks its decoded-size limit; the new envelope preflight is not a decompression sandbox. Use trusted, bounded diagnostic samples; a production service needs process isolation plus stronger streaming, allocation and decompression budgets.
+The Avro specification uses raw RFC 1951 DEFLATE blocks. MoonIce also accepts the three trailing Adler-32 bytes emitted by fastavro 1.12.2 when they match the decoded payload. Truncated streams and other trailing data return `INVALID_AVRO`. See the [Avro specification](https://avro.apache.org/docs/1.12.0/specification/#deflate) and [fastavro writer](https://github.com/fastavro/fastavro/blob/1.12.2/fastavro/_write_py.py).
+
+These format budgets apply to the encoded and decoded data, while schemas, datum objects, output rows and compiler runtime have their own overhead. Process RSS and CPU time need separate limits. Use trusted diagnostic samples, and isolate a service that processes untrusted input.
 
 The current scanner materializes files. Batch callbacks avoid a single combined
 result array but do not impose a decoder allocation budget. A callback error stops

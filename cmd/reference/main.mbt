@@ -20,6 +20,12 @@ fn main raise {
       (_, String(s)) => Integer(@json.from_json(Json(s)))
       _ => abort("Unsupported case value")
     }
+    if transform == "manifest-list" {
+      guard value is Binary(data) else { abort("Expected Avro bytes") }
+      return Json(@moonice.decode_manifest_list(data)) catch {
+        @moonice.Invalid(code, _, _) => Json(code)
+      }
+    }
     if transform == "parquet-fields" {
       guard value is Binary(data) else { abort("Expected Parquet bytes") }
       return Json(

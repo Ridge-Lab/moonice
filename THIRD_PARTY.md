@@ -1,7 +1,7 @@
 # Third-party components
 
-The compiled MoonIce browser and CLI distributions include code from these
-MoonBit components. Their package-level license is Apache-2.0; the license text
+The MoonIce browser and CLI distributions retain notices for these direct and
+transitive MoonBit components. Their package-level license is Apache-2.0; the license text
 is provided in the accompanying `LICENSE` file. The dependencies retain their
 own authorship. MoonBit core also carries upstream notices and licenses for
 adapted components: its unchanged [LICENSE](licenses/moonbit-core-LICENSE) and
@@ -11,10 +11,10 @@ attribution and license terms reproduced there.
 
 | Component | Version | Purpose and source |
 |---|---|---|
-| MoonBit core | 0.10.20+65efd5b93 | Standard library, [moonbitlang/core](https://github.com/moonbitlang/core) |
+| MoonBit core | 0.10.20+65efd5b93 | Standard library and bounded raw DEFLATE decoding, [moonbitlang/core](https://github.com/moonbitlang/core) |
 | moonbitlang/x | 0.5.7 | Filesystem support used by the Parquet package and CLI, [moonbitlang/x](https://github.com/moonbitlang/x) |
 | yugonlian/moon-avro | 0.3.0 | Avro container decoding, [moon-avro](https://github.com/yugonlian/moon-avro) |
-| Milky2018/moon_yazi | 0.1.3 | DEFLATE support for Avro, [moon_yazi](https://github.com/moonbit-community/moon_yazi) |
+| Milky2018/moon_yazi | 0.1.3 | Transitive codec dependency of moon-avro, [moon_yazi](https://github.com/moonbit-community/moon_yazi) |
 | mizchi/parquet | 0.2.2 | Parquet data-page decoding, [mizchi/parquet](https://github.com/mizchi/parquet) |
 
 The dependency resolver also downloads `mizchi/duckdb@0.6.6` and

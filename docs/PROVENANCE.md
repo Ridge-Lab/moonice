@@ -12,11 +12,11 @@ the implementation.
 
 ## Dependencies
 
-- `yugonlian/moon-avro@0.3.0`, Apache-2.0: Avro binary and OCF decoding.
+- `yugonlian/moon-avro@0.3.0`, Apache-2.0: Avro schema, OCF header and binary datum decoding.
   <https://github.com/yugonlian/moon-avro>
 - `mizchi/parquet@0.2.2`, Apache-2.0: Parquet data-page decoding.
   <https://github.com/mizchi/parquet>
-- MoonBit standard library, Apache-2.0.
+- MoonBit standard library, Apache-2.0, including the experimental `compress/flate` two-pass DEFLATE decoder in the pinned toolchain. MoonIce applies the per-block and cumulative limits and checks producer framing.
 - `moonbitlang/x@0.5.7`, Apache-2.0: CLI filesystem and process support.
 
 These remain dependencies, rather than being presented as MoonIce implementation

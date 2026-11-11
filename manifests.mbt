@@ -1,7 +1,7 @@
 ///|
 /// Read a standard Avro manifest list. Only null/deflate OCF codecs are supported.
 pub fn decode_manifest_list(data : Bytes) -> Array[Manifest] raise IceError {
-  container_records(data, "manifest-list").map(row => {
+  map_container(data, "manifest-list", row => {
     let m : Manifest = {
       path: avro_string(avro_field(row, "manifest_path"), "manifest_path"),
       length: nonnegative(
@@ -69,26 +69,25 @@ pub fn decode_manifest(
       "Manifest length disagrees with the manifest list",
     )
   }
-  let (header, _) = @avro.decode_header(data) catch {
-    err => raise Invalid("INVALID_AVRO", manifest.path, "\{Repr(err)}")
-  }
-  for
-    pair in [
-      ("format-version", "2"),
-      ("partition-spec-id", manifest.spec_id.to_string()),
-      ("content", if manifest.content == 0 { "data" } else { "deletes" }),
-    ] {
-    let (key, expected) = pair
-    guard header.metadata().get(key) is Some(value) &&
-      value == @utf8.encode(expected) else {
-      raise Invalid(
-        "MANIFEST_HEADER",
-        manifest.path,
-        "Header \{key} disagrees with v2 manifest descriptor",
-      )
+  fn check_header(header : @avro.OcfHeader) -> Unit raise IceError {
+    for
+      pair in [
+        ("format-version", "2"),
+        ("partition-spec-id", manifest.spec_id.to_string()),
+        ("content", if manifest.content == 0 { "data" } else { "deletes" }),
+      ] {
+      let (key, expected) = pair
+      guard header.metadata().get(key) is Some(value) &&
+        value == @utf8.encode(expected) else {
+        raise Invalid(
+          "MANIFEST_HEADER",
+          manifest.path,
+          "Header \{key} disagrees with v2 manifest descriptor",
+        )
+      }
     }
   }
-  container_records(data, manifest.path).map(row => {
+  map_container(data, manifest.path, check_header~, row => {
     let status = avro_int(avro_field(row, "status"), "status")
     if status < 0 || status > 2 {
       raise Invalid(

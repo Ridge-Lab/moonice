@@ -1,4 +1,5 @@
 import {
+  "moonbitlang/core/compress/flate",
   "moonbitlang/core/json",
   "moonbitlang/core/string",
   "moonbitlang/core/encoding/utf8",
@@ -7,3 +8,7 @@ import {
   "yugonlian/moon-avro/codec" @avro_codec,
   "mizchi/parquet",
 }
+
+options(
+  "allow-experimental-packages": [ "moonbitlang/core/compress/flate" ],
+)

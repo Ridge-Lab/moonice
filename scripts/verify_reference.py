@@ -6,11 +6,13 @@ from __future__ import annotations
 import argparse
 import base64
 import hashlib
+from io import BytesIO
 import json
 from pathlib import Path
 import random
 import subprocess
 import sys
+import zlib
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -20,6 +22,62 @@ def run_json(command):
     if result.returncode:
         raise RuntimeError(f"Reference driver exited {result.returncode}: {result.stdout}\n{result.stderr}")
     return json.loads(result.stdout)
+
+
+def manifest_cases():
+    """Cross-check real OCF producers and distinguish bad streams from resource limits."""
+    import fastavro
+    from fastavro import _write_py
+    sync = b"moonice-reference"[:16]
+    fields = [("manifest_path", "string"), ("manifest_length", "long"), ("partition_spec_id", "int"),
+              ("content", "int"), ("sequence_number", "long"), ("min_sequence_number", "long"),
+              ("added_snapshot_id", "long"), ("extension", "bytes")]
+    schema = {"type": "record", "name": "manifest_file", "fields": [{"name": k, "type": t} for k, t in fields]}
+    rows = [dict(zip((k for k, _ in fields), [f"memory://m{i}", 18+i, i, i, 9, 7, 2**53+1+i, b""])) for i in range(2)]
+
+    def file(writer, codec, records):
+        out = BytesIO()
+        writer(out, schema, records, codec=codec, sync_interval=1, sync_marker=sync)
+        return out.getvalue()
+
+    def avro(typ, value):
+        out = BytesIO()
+        fastavro.schemaless_writer(out, typ, value)
+        return out.getvalue()
+
+    def raw_deflate(payload):
+        encoder = zlib.compressobj(wbits=-15)
+        return encoder.compress(payload) + encoder.flush()
+
+    header = file(fastavro.writer, "deflate", [])
+    def frame(block):
+        return header + avro("long", 1) + avro("long", len(block)) + block + sync
+
+    def projection(data):
+        return [{"path": r["manifest_path"], "length": str(r["manifest_length"]), "spec_id": r["partition_spec_id"],
+                 "content": r["content"], "sequence_number": str(r["sequence_number"]),
+                 "min_sequence_number": str(r["min_sequence_number"]), "added_snapshot_id": str(r["added_snapshot_id"])}
+                for r in fastavro.reader(BytesIO(data))]
+
+    block = raw_deflate(avro(schema, rows[0]))
+    valid = [file(fastavro.writer, codec, rows) for codec in ("null", "deflate")]
+    valid += [file(_write_py.writer, "deflate", rows), frame(block)]
+    limit = 8 * 1024 * 1024
+    padded = rows[0].copy()
+    padded["extension"] = bytes(limit)
+    overhead = len(avro(schema, padded)) - limit
+    padded["extension"] = bytes(limit - overhead)
+    exact = avro(schema, padded)
+    assert len(exact) == limit
+    valid.append(frame(raw_deflate(exact)))
+    padded["extension"] += b"\0"
+    over = avro(schema, padded)
+    assert len(over) == limit + 1
+    cases = [(data, projection(data)) for data in valid]
+    cases += [(frame(raw_deflate(over)), "RESOURCE_LIMIT"), (frame(block[:-1]), "INVALID_AVRO"),
+              (frame(block + b"bad"), "INVALID_AVRO"), (frame(raw_deflate(avro(schema, rows[0]) + b"x")), "INVALID_AVRO"),
+              (valid[0][:-1] + b"!", "INVALID_AVRO")]
+    return cases
 
 
 def main():
@@ -70,12 +128,18 @@ def main():
                                data_page_version=page_version, row_group_size=2)
                 cases.append({"type": "binary", "transform": "parquet-fields", "input": wire(sink.getvalue().to_pybytes())})
                 expected.append([1, 2])
+    parquet_count = len(cases) - transform_count
+    manifests = manifest_cases()
+    for data, result in manifests:
+        cases.append({"type": "binary", "transform": "manifest-list", "input": wire(data)})
+        expected.append(result)
     corpus = args.output.parent / "transform-cases.json"
     corpus.write_text(json.dumps(cases, ensure_ascii=False), encoding="utf-8")
     actual = run_json([args.node, str(ROOT / "_build/js/release/build/cmd/reference/reference.js"), str(corpus)])
     if actual != expected:
-        failures = [{"case": case, "expected": want, "actual": got} for case, want, got in zip(cases, expected, actual) if want != got]
-        raise AssertionError(f"Transform oracle mismatch: {failures[:5]}; lengths={len(expected)}/{len(actual)}")
+        failures = [{"index": i, "transform": case["transform"], "expected": want, "actual": got}
+                    for i, (case, want, got) in enumerate(zip(cases, expected, actual)) if want != got]
+        raise AssertionError(f"Reference mismatch: {failures[:5]}; lengths={len(expected)}/{len(actual)}")
 
     fixtures = args.output.parent / "live-fixtures"
     generate(fixtures)
@@ -96,7 +160,7 @@ def main():
             raise AssertionError({"case": case, "actual_ids": ids, "actual_files": files})
         scans.append({"case": case["label"], "rows": len(ids), "files": len(files)})
     report = {"status": "passed", "seed": args.seed, "pyiceberg": pyiceberg.__version__, "pyarrow": pyarrow.__version__,
-              "transform_cases": transform_count, "parquet_preflight_cases": len(cases)-transform_count,
+              "transform_cases": transform_count, "parquet_preflight_cases": parquet_count, "avro_container_cases": len(manifests),
               "corpus_sha256": hashlib.sha256(corpus.read_bytes()).hexdigest(), "scans": scans,
               "limits": "Synthetic bounded samples; live PyIceberg plan/row oracle. Does not certify all Iceberg versions or equality-delete execution."}
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

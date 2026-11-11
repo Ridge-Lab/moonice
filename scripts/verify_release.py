@@ -47,7 +47,14 @@ fn demonstrate() -> Unit raise {
   try row.project(schema) catch {
     @moonice.Invalid(code, _, _) => assert_eq(code, "UNSUPPORTED_TYPE")
   } noraise { _ => fail("Published package accepted an out-of-range int") }
-  println("MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected")
+  // A complete raw stream for Avro long 7 followed by an invalid producer suffix.
+  let sync = b"0123456789abcdef"
+  let header = b"Obj\x01\x04\x14avro.codec\x0edeflate\x16avro.schema\x0c\"long\"\x00"
+  let bad_block = b"\x02\x0c\xe3\x03\x00bad"
+  try @moonice.decode_manifest_list(header + sync + bad_block + sync) catch {
+    @moonice.Invalid(code, _, _) => assert_eq(code, "INVALID_AVRO")
+  } noraise { _ => fail("Published package accepted trailing DEFLATE data") }
+  println("MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected deflate_tail=rejected")
 }
 
 ///|
@@ -132,7 +139,7 @@ def main() -> int:
         run = subprocess.run(["moon", "run", "--target", target, "."], cwd=directory, check=True,
                              capture_output=True, text=True, encoding="utf-8", timeout=300)
         print(run.stdout, end="")
-        if "MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected" not in run.stdout:
+        if "MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected deflate_tail=rejected" not in run.stdout:
             raise ValueError(f"{target}: successful exit without consumer assertions marker")
         results.append({"target": target, "exit_code": run.returncode, "stdout": run.stdout})
     require_identity(module_identity(installed_mod), args.version, "Installed package after execution")

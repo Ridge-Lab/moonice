@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2 — 2026-11-11
+
+- Validate compressed manifest payloads with a bounded first pass. Enforce both the per-block 8 MiB decoded limit and a cumulative 64 MiB limit before allocating the block's output. Reject malformed trailing bytes while reading fastavro 1.12.2 files.
+- Decode each Avro header once and project each datum as it is read. Compare manifest fields, 64-bit IDs and failure codes against independently generated fastavro/zlib files.
+- Measure data-file calls and bytes through the public batch-reader callback for full and partition-pruned scans of the same snapshot.
+
 ## 0.3.1 — 2026-11-11
 
 - Adopt MoonBit compiler/core 0.10.20 and its `#derive` syntax. The v0.3.0 tag retains the 0.10.16 source and package.
