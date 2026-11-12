@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.3 — 2026-11-12
+
+- Recover an identity-partitioned field from the file's partition tuple when Parquet omits its physical column. Scans use the recovered value for projection, row filters and equality deletes. A physically stored null stays null.
+
 ## 0.3.2 — 2026-11-11
 
 - Validate compressed manifest payloads with a bounded first pass. Enforce both the per-block 8 MiB decoded limit and a cumulative 64 MiB limit before allocating the block's output. Reject malformed trailing bytes while reading fastavro 1.12.2 files.

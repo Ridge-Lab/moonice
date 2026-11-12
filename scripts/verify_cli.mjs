@@ -21,4 +21,14 @@ run(['scan', 'work/does-not-exist.icebundle.json'], 2);
 run(['scan', input, '--filter', '{"field":"unknown","op":"=","value":1}'], 1);
 run(['scan', input, '--limit', '-1'], 1);
 run(['scan', input, '--filter', '{"field":"id","op":"=","value":"9007199254740993"}']);
-console.log('CLI: exact Int64, deletes, output limits, invalid inputs and exit codes passed');
+
+// DuckDB's shared_source fixture stores region in the manifest's identity
+// partition. Its Parquet file physically contains only id.
+const sharedSource = 'fixtures/duckdb/identity-source.icebundle.json';
+const allRows = JSON.parse(run(['scan', sharedSource])).result.scan.rows;
+assert.deepEqual(allRows.map(row => [row.values.id, row.values.region]).sort(),
+  [['1', 'eu'], ['2', 'eu']]);
+const byRegion = JSON.stringify({field: 'region', op: '=', value: 'eu'});
+const filtered = JSON.parse(run(['scan', sharedSource, '--filter', byRegion])).result.scan;
+assert.equal(filtered.matched_rows, 2);
+console.log('CLI: exact Int64, deletes, identity partition columns, limits and error exits passed');

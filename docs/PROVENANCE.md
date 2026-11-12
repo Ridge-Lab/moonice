@@ -10,6 +10,18 @@ repository. AI assistance must not be represented as unassisted human authorship
 The maintainer remains responsible for reviewing, understanding and maintaining
 the implementation.
 
+## DuckDB identity partition fixture
+
+`fixtures/duckdb/identity-source.icebundle.json` wraps the current metadata
+JSON and the three referenced Avro/Parquet objects from DuckDB's
+[shared_source test table](https://github.com/duckdb/duckdb-iceberg/tree/ac8740d514aadfa82c0b6545c23647167ff6dfcf/data/persistent/partition_values_missing_from_files/warehouse/default/shared_source).
+The original URIs and file contents are preserved. The fixture is distributed
+with the [upstream MIT license](../fixtures/duckdb/LICENSE).
+The [upstream SQL assertions](https://github.com/duckdb/duckdb-iceberg/blob/ac8740d514aadfa82c0b6545c23647167ff6dfcf/test/sql/local/partitioning/identity/identity_source_missing_from_file.test)
+give both expected rows and the filtered count. Run
+`moon run --target js cmd/main -- scan fixtures/duckdb/identity-source.icebundle.json`
+to read the same table. The CLI regression runs these checks offline.
+
 ## Dependencies
 
 - `yugonlian/moon-avro@0.3.0`, Apache-2.0: Avro schema, OCF header and binary datum decoding.
@@ -32,7 +44,7 @@ omitted the core NOTICE; the packaging scripts now retain it explicitly.
 
 ## Reference data
 
-Reference fixtures are synthetic data produced by Apache PyIceberg and PyArrow.
+The project-authored reference tables use synthetic data produced by Apache PyIceberg and PyArrow.
 The generator and its pinned dependencies are included for reproducibility.
 They do not contain personal or production data. Reference comparison programs
 use Python because they execute the independent PyIceberg/PyArrow implementation;

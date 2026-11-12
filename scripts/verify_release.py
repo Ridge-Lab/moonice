@@ -12,6 +12,28 @@ import subprocess
 ROOT = Path(__file__).resolve().parent.parent
 PACKAGE = "Ridge-Lab/moonice"
 CONSUMER = r'''///|
+fn verify_identity_projection() -> Unit raise {
+  let bundle = @moonice.open_bundle(@fs.read_file_to_string("fixtures/duckdb/identity-source.icebundle.json"))
+  let read = path => bundle.read_file(path)
+  let state = @moonice.load_snapshot(bundle.metadata, read)
+  let visible = @moonice.scan_rows(bundle.metadata, state, All, read)
+  let ids : Array[Int64] = []
+  for row in visible.rows {
+    let values = row.project(visible.schema)
+    assert_eq(values.get("region"), Some(@moonice.Text("eu")))
+    match values.get("id") {
+      Some(@moonice.Integer(id)) => ids.push(id)
+      _ => fail("Expected an integer id from the DuckDB fixture")
+    }
+  }
+  ids.sort()
+  assert_eq(ids, [1L, 2L])
+  let predicate = @moonice.parse_predicate("{\"field\":\"region\",\"op\":\"=\",\"value\":\"eu\"}", state.schema)
+  let selected = @moonice.scan_rows(bundle.metadata, state, predicate, read)
+  assert_eq(selected.matched_rows, 2)
+}
+
+///|
 fn demonstrate() -> Unit raise {
   let bundle = @moonice.open_bundle(@fs.read_file_to_string("fixtures/deletes.icebundle.json"))
   let read = path => bundle.read_file(path)
@@ -54,7 +76,8 @@ fn demonstrate() -> Unit raise {
   try @moonice.decode_manifest_list(header + sync + bad_block + sync) catch {
     @moonice.Invalid(code, _, _) => assert_eq(code, "INVALID_AVRO")
   } noraise { _ => fail("Published package accepted trailing DEFLATE data") }
-  println("MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected deflate_tail=rejected")
+  verify_identity_projection()
+  println("MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected deflate_tail=rejected identity_eu=2")
 }
 
 ///|
@@ -111,8 +134,9 @@ def write_consumer(directory: Path, version: str) -> None:
     (directory / "moon.mod").write_text(f'name = "verify/moonice_consumer"\nversion = "0.0.0"\nimport {{ "{PACKAGE}@{version}", "moonbitlang/x@0.5.7" }}\n', encoding="utf-8")
     shutil.copyfile(ROOT / "examples/library_read/moon.pkg", directory / "moon.pkg")
     (directory / "main.mbt").write_text(CONSUMER, encoding="utf-8")
-    (directory / "fixtures").mkdir()
-    shutil.copyfile(ROOT / "fixtures/deletes.icebundle.json", directory / "fixtures/deletes.icebundle.json")
+    (directory / "fixtures/duckdb").mkdir(parents=True)
+    for fixture in ("deletes.icebundle.json", "duckdb/identity-source.icebundle.json", "duckdb/LICENSE"):
+        shutil.copyfile(ROOT / "fixtures" / fixture, directory / "fixtures" / fixture)
 
 
 def main() -> int:
@@ -139,7 +163,7 @@ def main() -> int:
         run = subprocess.run(["moon", "run", "--target", target, "."], cwd=directory, check=True,
                              capture_output=True, text=True, encoding="utf-8", timeout=300)
         print(run.stdout, end="")
-        if "MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected deflate_tail=rejected" not in run.stdout:
+        if "MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected deflate_tail=rejected identity_eu=2" not in run.stdout:
             raise ValueError(f"{target}: successful exit without consumer assertions marker")
         results.append({"target": target, "exit_code": run.returncode, "stdout": run.stdout})
     require_identity(module_identity(installed_mod), args.version, "Installed package after execution")

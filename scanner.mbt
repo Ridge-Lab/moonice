@@ -39,6 +39,42 @@ fn equality_key(
 }
 
 ///|
+// Iceberg column projection resolves physically absent field IDs from identity
+// partitions before filters and equality deletes. A stored null is present.
+fn restore_identity_columns(
+  metadata : TableMetadata,
+  entry : ManifestEntry,
+  rows : Array[DataRow],
+) -> Unit raise IceError {
+  guard rows.length() > 0 else { return }
+  guard metadata.partition_specs.iter().find_first(s => s.id == entry.spec_id)
+    is Some(spec) else {
+    raise Invalid(
+      "SPEC_NOT_FOUND",
+      entry.file.path,
+      "Data partition spec is absent",
+    )
+  }
+  // A flat Parquet file uses the same physical column IDs for every row.
+  for field in spec.fields {
+    if field.transform == "identity" &&
+      !rows[0].values.contains(field.source_id) &&
+      entry.file.partition.get(field.name) is Some(value) {
+      if rows[0].values.length() + 1 > 5000000 / rows.length() {
+        raise Invalid(
+          "RESOURCE_LIMIT",
+          entry.file.path,
+          "Partition projection exceeds five million cells",
+        )
+      }
+      for row in rows {
+        row.values[field.source_id] = value
+      }
+    }
+  }
+}
+
+///|
 fn walk_rows(
   metadata : TableMetadata,
   state : SnapshotState,
@@ -67,6 +103,7 @@ fn walk_rows(
         "RESOURCE_LIMIT", "scan", "Scan exceeds one million data rows",
       )
     }
+    restore_identity_columns(metadata, entry, rows)
     let positions : Map[Int64, Bool] = Map([])
     let equality : Array[(Array[Int32], Map[String, Bool])] = []
     for deletion in deletions {

@@ -75,6 +75,47 @@ test "NaN identity partitions match for delete applicability" {
 }
 
 ///|
+test "identity projection follows the data file spec and preserves stored nulls" {
+  let original = delete_test_metadata()
+  let identity = original.partition_specs[1].fields[0]
+  let bucket = {
+    ..identity,
+    field_id: 1001,
+    name: "hash",
+    transform: "bucket[16]",
+  }
+  let metadata = {
+    ..original,
+    default_spec_id: 2,
+    partition_specs: [
+      { id: 1, fields: [bucket, identity], },
+      { id: 2, fields: [bucket], },
+    ],
+  }
+  let data = delete_test_entry(0, 1L, spec=1)
+  data.file.partition["hash"] = Integer(5L)
+  fn resolve(
+    spec : Int32,
+    values : Map[Int32, Scalar],
+  ) -> Map[Int32, Scalar] raise IceError {
+    let row : DataRow = { file_path: data.file.path, position: 0L, values, }
+    restore_identity_columns(metadata, { ..data, spec_id: spec, }, [row])
+    row.values
+  }
+  assert_eq(resolve(1, Map([])).get(1), Some(Text("east")))
+  assert_eq(resolve(1, Map([(1, Missing)])).get(1), Some(Missing))
+  assert_eq(
+    resolve(1, Map([(1, Text("physical"))])).get(1),
+    Some(Text("physical")),
+  )
+  assert_eq(resolve(2, Map([])).get(1), None)
+  data.file.partition["region"] = Missing
+  assert_eq(resolve(1, Map([])).get(1), Some(Missing))
+  data.file.partition.remove("region")
+  assert_eq(resolve(1, Map([])).get(1), None)
+}
+
+///|
 test "delete sequence boundary matrix follows Iceberg v2" {
   let metadata = delete_test_metadata()
   for data_seq in 0..<5 {

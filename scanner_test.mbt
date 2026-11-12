@@ -85,3 +85,55 @@ test "missing applicable delete file fails instead of resurrecting rows" {
     _ => fail("Must not silently ignore a delete file")
   }
 }
+
+///|
+test "equality deletes and residuals see identity values absent from Parquet" {
+  let bundle = @moonice.open_bundle(delete_bundle)
+  let state = bundle.load_snapshot()
+  let identity : @moonice.PartitionSpec = {
+    id: 1,
+    fields: [
+      { source_id: 2, field_id: 1000, name: "area", transform: "identity", },
+    ],
+  }
+  let metadata = {
+    ..bundle.metadata,
+    partition_specs: [..bundle.metadata.partition_specs, identity],
+  }
+  guard state.entries.iter().find_first(e => e.file.content == 1)
+    is Some(source) &&
+    state.entries.iter().find_first(e => e.file.content == 2) is Some(deletion) else {
+    fail("Missing fixture")
+  }
+  // Reuse a real Parquet file whose physical IDs do not include category (2).
+  // The existing global equality-delete file contains the keys "b" and null.
+  let schema : @moonice.Schema = { id: 0, fields: [state.schema.fields[1]], }
+  let cases : Array[(@moonice.Scalar, Int32)] = [
+    (Text("b"), 1),
+    (Missing, 1),
+    (Text("c"), 0),
+  ]
+  for (value, deleted) in cases {
+    let entry = {
+      ..source,
+      spec_id: 1,
+      sequence_number: 1L,
+      file: { ..source.file, content: 0, partition: Map([("area", value)]), },
+    }
+    let scan = @moonice.scan_rows(
+      metadata,
+      { ..state, schema, entries: [entry, deletion], },
+      if deleted == 0 {
+        Compare(2, Eq, Text("c"))
+      } else {
+        All
+      },
+      p => bundle.read_file(p),
+    )
+    assert_eq(scan.deleted_rows, deleted)
+    assert_eq(scan.matched_rows, 1 - deleted)
+    if deleted == 0 {
+      assert_eq(scan.rows[0].project(schema)["category"], value)
+    }
+  }
+}
