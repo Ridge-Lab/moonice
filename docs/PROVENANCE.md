@@ -22,6 +22,14 @@ give both expected rows and the filtered count. Run
 `moon run --target js cmd/main -- scan fixtures/duckdb/identity-source.icebundle.json`
 to read the same table. The CLI regression runs these checks offline.
 
+The second table, [column_mapping](https://github.com/duckdb/duckdb-iceberg/tree/ac8740d514aadfa82c0b6545c23647167ff6dfcf/data/persistent/column_mapping),
+ships as `fixtures/duckdb/column-mapping.icebundle.json` under the same MIT
+license. Metadata and the referenced manifest list, manifest and Parquet bytes
+are preserved. The Parquet schema has no field IDs and includes map, list and
+struct columns. [DuckDB's SQL test](https://github.com/duckdb/duckdb-iceberg/blob/ac8740d514aadfa82c0b6545c23647167ff6dfcf/test/sql/local/column_mapping.test)
+records all three rows. The independent PyArrow comparison in
+`scripts/verify_reference.py` uses the original Parquet bytes.
+
 ## Dependencies
 
 - `yugonlian/moon-avro@0.3.0`, Apache-2.0: Avro schema, OCF header and binary datum decoding.

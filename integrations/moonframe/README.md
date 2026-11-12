@@ -25,7 +25,7 @@ a conversion for every Iceberg type. Example dependency:
 
 ## Backend boundary
 
-MoonIce 0.3.3 uses `mizchi/parquet@0.2.2`, `moonbitlang/x@0.5.7`,
+MoonIce 0.4.0 uses `mizchi/parquet@0.2.2`, `moonbitlang/x@0.5.7`,
 MoonFrame 0.8.1 and NyaCSV 0.3.4 with `moonc v0.10.20+65efd5b93`.
 It uses public `Series::from_scalars` to retain typed Int64/null values.
 MoonFrame 0.8.1 uses the gzip package supplied by this SDK. For SDK 0.10.16,

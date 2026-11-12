@@ -31,4 +31,12 @@ assert.deepEqual(allRows.map(row => [row.values.id, row.values.region]).sort(),
 const byRegion = JSON.stringify({field: 'region', op: '=', value: 'eu'});
 const filtered = JSON.parse(run(['scan', sharedSource, '--filter', byRegion])).result.scan;
 assert.equal(filtered.matched_rows, 2);
+const mixed = 'fixtures/duckdb/column-mapping.icebundle.json';
+const adults = JSON.stringify({field: 'age', op: '>=', value: '30'});
+const names = JSON.parse(run(['scan', mixed, '--column', 'name', '--filter', adults])).result.scan;
+assert.deepEqual(names.rows.map(row => row.values), [{name: 'Bob'}, {name: 'Charlie'}]);
+assert.deepEqual(names.schema.fields.map(field => field.name), ['name']);
+assert.equal(JSON.parse(run(['scan', mixed, '--column', 'scores'], 1)).error.code, 'UNSUPPORTED_TYPE');
+assert.equal(JSON.parse(run(['scan', mixed], 1)).error.code, 'UNSUPPORTED_NESTED');
+run(['plan', mixed, '--column', 'name'], 2);
 console.log('CLI: exact Int64, deletes, identity partition columns, limits and error exits passed');

@@ -13,6 +13,13 @@ fn main raise {
       @fs.read_file_to_bytes("fixtures/" + name),
     )
   }
+  for dir in ["web/fixtures", "web/fixtures/duckdb"] {
+    if !@fs.path_exists(dir) { @fs.create_dir(dir) }
+  }
+  for name in ["column-mapping.icebundle.json", "LICENSE"] {
+    @fs.write_bytes_to_file("web/fixtures/duckdb/" + name,
+      @fs.read_file_to_bytes("fixtures/duckdb/" + name))
+  }
   for name in ["LICENSE", "THIRD_PARTY.md"] {
     @fs.write_bytes_to_file("web/" + name, @fs.read_file_to_bytes(name))
   }

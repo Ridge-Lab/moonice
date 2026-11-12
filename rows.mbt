@@ -21,10 +21,49 @@ fn parquet_scalar(value : @parquet.Value) -> Scalar {
 }
 
 ///|
-/// Materialize a bounded, flat Parquet file with original positions and IDs.
+/// Materialize bounded Parquet rows with original positions and physical IDs.
+/// Select top-level columns with field_ids. This physical reader does not
+/// apply Iceberg deletes, defaults, or partition constants; use scan_rows for a table.
 pub fn read_data_rows(
   bytes : Bytes,
   file : DataFile,
+  field_ids? : Array[Int32],
+  name_mapping~ : Map[String, Int32] = Map([]),
+) -> Array[DataRow] raise IceError {
+  let wanted = match field_ids {
+    None => None
+    Some(ids) => {
+      let selection = Map([])
+      for id in ids {
+        guard id > 0 && !selection.contains(id) else {
+          raise Invalid(
+            "INVALID_PROJECTION",
+            file.path,
+            "Physical field IDs must be positive and unique",
+          )
+        }
+        selection[id] = true
+      }
+      guard !selection.is_empty() else {
+        raise Invalid(
+          "INVALID_PROJECTION",
+          file.path,
+          "Select at least one field ID",
+        )
+      }
+      Some(selection)
+    }
+  }
+  read_file_columns(bytes, file, wanted, name_mapping)
+}
+
+///|
+fn read_file_columns(
+  bytes : Bytes,
+  file : DataFile,
+  wanted : Map[Int32, Bool]?,
+  aliases : Map[String, Int32],
+  identity_ids~ : Map[Int32, Bool] = Map([]),
 ) -> Array[DataRow] raise IceError {
   if file.format != "PARQUET" {
     raise Invalid(
@@ -47,8 +86,19 @@ pub fn read_data_rows(
       "Row reading is limited to 100,000 rows and 64 MiB per file",
     )
   }
-  let ids = parquet_field_ids(bytes)
-  let parquet = @parquet.read_bytes(bytes) catch {
+  let (input, ids) = match wanted {
+    None => (Some(bytes), parquet_field_ids(bytes))
+    Some(ids) => projected_parquet(bytes, file, ids, aliases, identity_ids)
+  }
+  guard input is Some(input) else {
+    // Projection of only missing (new or identity-partitioned) columns.
+    return Array::makei(file.record_count.to_int(), i => {
+      file_path: file.path,
+      position: i.to_int64(),
+      values: Map([]),
+    })
+  }
+  let parquet = @parquet.read_bytes(input) catch {
     error => raise Invalid("PARQUET_DECODE", file.path, error.to_string())
   }
   if parquet.row_count().to_int64() != file.record_count ||

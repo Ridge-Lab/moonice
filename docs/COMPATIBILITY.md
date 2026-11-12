@@ -1,6 +1,6 @@
 # Compatibility and boundaries
 
-MoonIce 0.3.3 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
+MoonIce 0.4.0 is a bounded Iceberg v2 reader/inspector, not a complete standards certification.
 
 | Surface | Current behavior |
 |---|---|
@@ -16,20 +16,20 @@ MoonIce 0.3.3 is a bounded Iceberg v2 reader/inspector, not a complete standards
 | Transform types | int/long/string/binary bucket and truncate; date/time/timestamp bucket; date year/month/day, timestamp year/month/day/hour; decimal/UUID transforms unsupported; overflow retains files |
 | Position deletes | Reserved field IDs for path/position, exact path match, zero-based positions; data sequence ≤ delete sequence |
 | Equality deletes | Flat supported scalar keys including null; data sequence < delete sequence; same partition or global unpartitioned spec |
-| Parquet | Existing `mizchi/parquet` decoder plus MoonIce field-ID footer inspection; flat primitive schema, explicit positive IDs |
+| Parquet | Full scans use flat primitive files with explicit IDs. Selected scans decode top-level scalar chunks and can skip nested siblings. Both paths reuse `mizchi/parquet` page decoding. |
 | Projection | Stable IDs survive renames. For a missing physical column, scans use the data file's own identity partition value when available, including null. Other missing optional fields read as null. Required nulls fail. Supports int→long. |
-| Nested/decimal/UUID/defaults | Not supported for row execution; unsupported projected types fail. No name mapping fallback for absent Parquet IDs |
+| Nested/decimal/UUID/defaults | Selecting these types fails. For selected scans of migrated files, top-level aliases come from the table's explicit `schema.name-mapping.default` property. |
 | Other data formats | Metadata can be inspected; ORC/Avro data-row execution fails explicitly |
 | Snapshot difference | Physical file additions/removals and schema changes; not logical row CDC |
 | Diagnostics | Bundle reference existence/size, incomplete traversal, unsupported format hints; not a complete file-integrity or table-consistency validator |
 | Storage | Caller-provided byte reader or explicit offline object map; no REST catalog, S3 client, remote auth or range reads |
-| Batch delivery | `scan_batches` emits visible filtered rows, 1–100,000 per callback; arrays are owned and not reused; shared delete indexes; whole-file decoding remains |
+| Batch delivery | `scan_batches` emits visible filtered rows, 1–100,000 per callback. The storage callback still supplies whole files. Selected scans assemble a bounded flat view from required compressed page streams. |
 | Mutations | No table writes, transactions, snapshot expiration or object deletion |
 
 The core and optional MoonFrame consumer use the same pinned toolchain and
 dependency versions. Their JS/Wasm/Wasm GC/native jobs are defined in CI; actual
 results are recorded in [validation](ACCEPTANCE.md). The current dependency graph is resolved from published versions without cache patches.
-MoonIce 0.3.3 uses compiler/core 0.10.20 and the optional MoonFrame 0.8.1 example.
+MoonIce 0.4.0 uses compiler/core 0.10.20 and the optional MoonFrame 0.8.1 example.
 For compiler/core 0.10.16, use the v0.3.0 tag or Mooncakes package 0.3.0.
 
 Independent PyArrow fixtures verify NONE and Snappy compression with dictionary

@@ -137,3 +137,58 @@ test "equality deletes and residuals see identity values absent from Parquet" {
     }
   }
 }
+
+///|
+test "output projection hides residual and equality keys and preserves deletion counts" {
+  let bundle = @moonice.open_bundle(delete_bundle)
+  let predicate = @moonice.Compare(1, Ge, Integer(1L))
+  let all = bundle.scan(predicate)
+  let selected = bundle.scan(predicate, columns=["id"])
+  assert_eq(selected.deleted_rows, all.deleted_rows)
+  assert_eq(selected.rows.map(r => r.values[1]), all.rows.map(r => r.values[1]))
+  assert_true(selected.rows.iter().all(r => r.values.length() == 1))
+  let keys = []
+  let widths = []
+  let summary = bundle.scan_batches(
+    predicate,
+    batch => {
+      for row in batch {
+        widths.push(row.values.length())
+        keys.push(row.values.get(2))
+      }
+    },
+    columns=["category"],
+    batch_size=1,
+  )
+  assert_eq(keys, all.rows.map(r => r.values.get(2)))
+  assert_true(widths.iter().all(n => n == 1))
+  assert_eq(summary.schema.fields.map(f => f.name), ["category"])
+}
+
+///|
+test "project old files by stable ID with newly added columns and no physical match" {
+  let bundle = @moonice.open_bundle(reference_bundle)
+  let all = bundle.scan(All)
+  let selected = bundle.scan(All, columns=["note", "region"])
+  assert_eq(selected.schema.fields.map(f => f.name), ["note", "region"])
+  for i, row in selected.rows {
+    assert_eq(
+      row.project(selected.schema),
+      all.rows[i].project(selected.schema),
+    )
+    assert_eq(row.values.length(), 2)
+  }
+  let missing_only = bundle.scan(All, columns=["note"])
+  assert_eq(missing_only.matched_rows, all.matched_rows)
+  assert_true(
+    missing_only.rows.iter().all(r => r.values.values().all(v => v == Missing)),
+  )
+  for columns in [[], ["id", "id"], ["no_such_field"]] {
+    try bundle.scan(All, columns~) catch {
+      @moonice.Invalid("INVALID_PROJECTION" | "FIELD_NOT_FOUND", _, _) => ()
+      other => raise other
+    } noraise {
+      _ => fail("Invalid projection succeeded")
+    }
+  }
+}

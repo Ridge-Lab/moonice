@@ -19,9 +19,13 @@ pub fn load_snapshot(TableMetadata, (String) -> Bytes raise IceError, snapshot_i
 
 pub fn open_bundle(String) -> Bundle raise IceError
 
+pub fn open_mapped_bundle(String) -> (Bundle, Map[String, Int32]) raise IceError
+
 pub fn parquet_field_ids(Bytes) -> Array[Int32] raise IceError
 
 pub fn parse_metadata(String) -> TableMetadata raise IceError
+
+pub fn parse_name_mapping(String) -> Map[String, Int32] raise IceError
 
 pub fn parse_predicate(String, Schema) -> Predicate raise IceError
 
@@ -29,13 +33,13 @@ pub fn plan_deletes(TableMetadata, SnapshotState, ScanPlan) -> Array[DeleteDecis
 
 pub fn plan_scan(TableMetadata, SnapshotState, Predicate) -> ScanPlan raise IceError
 
-pub fn read_data_rows(Bytes, DataFile) -> Array[DataRow] raise IceError
+pub fn read_data_rows(Bytes, DataFile, field_ids? : Array[Int32], name_mapping? : Map[String, Int32]) -> Array[DataRow] raise IceError
 
 pub fn run_request(String, String) -> String
 
-pub fn scan_batches(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, (Array[DataRow]) -> Unit raise IceError, batch_size? : Int32) -> ScanSummary raise IceError
+pub fn scan_batches(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, (Array[DataRow]) -> Unit raise IceError, batch_size? : Int32, columns? : Array[String], name_mapping? : Map[String, Int32]) -> ScanSummary raise IceError
 
-pub fn scan_rows(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, limit? : Int32) -> ScanResult raise IceError
+pub fn scan_rows(TableMetadata, SnapshotState, Predicate, (String) -> Bytes raise IceError, limit? : Int32, columns? : Array[String], name_mapping? : Map[String, Int32]) -> ScanResult raise IceError
 
 pub fn transform_partition(Scalar, @json.Json, String) -> Scalar?
 
@@ -58,8 +62,8 @@ pub(all) struct Bundle {
 pub fn Bundle::diagnose(Self) -> Diagnosis
 pub fn Bundle::load_snapshot(Self, snapshot_id? : Int64) -> SnapshotState raise IceError
 pub fn Bundle::read_file(Self, String) -> Bytes raise IceError
-pub fn Bundle::scan(Self, Predicate, snapshot_id? : Int64, limit? : Int32) -> ScanResult raise IceError
-pub fn Bundle::scan_batches(Self, Predicate, (Array[DataRow]) -> Unit raise IceError, snapshot_id? : Int64, batch_size? : Int32) -> ScanSummary raise IceError
+pub fn Bundle::scan(Self, Predicate, snapshot_id? : Int64, limit? : Int32, columns? : Array[String], name_mapping? : Map[String, Int32]) -> ScanResult raise IceError
+pub fn Bundle::scan_batches(Self, Predicate, (Array[DataRow]) -> Unit raise IceError, snapshot_id? : Int64, batch_size? : Int32, columns? : Array[String], name_mapping? : Map[String, Int32]) -> ScanSummary raise IceError
 pub fn Bundle::to_repr(Self) -> @debug.Repr
 
 #derive(Eq, @debug.Debug, @json.ToJson)

@@ -1,4 +1,9 @@
 ///|
+fn test_footer_object(fields : Map[Int32, FooterValue]) -> FooterValue {
+  Obj(fields, b"")
+}
+
+///|
 test "compact field IDs cannot wrap into a valid ID" {
   // Explicit field ID 4294967297, zigzag encoded; truncating it produces 1.
   let reader = FooterReader::{
@@ -15,8 +20,12 @@ test "compact field IDs cannot wrap into a valid ID" {
 
 ///|
 test "Parquet budgets reject inconsistent counts before decoding pages" {
-  let column : FooterValue = Obj(Map([(3, Obj(Map([(5, Num(100000L))])))]))
-  let group : FooterValue = Obj(Map([(1, Seq([column])), (3, Num(1L))]))
+  let column : FooterValue = test_footer_object(
+    Map([(3, test_footer_object(Map([(5, Num(100000L))])))]),
+  )
+  let group : FooterValue = test_footer_object(
+    Map([(1, Seq([column])), (3, Num(1L))]),
+  )
   let fields : Map[Int32, FooterValue] = Map([(3, Num(1L)), (4, Seq([group]))])
   try validate_parquet_layout(fields, b"PAR1", 4, 1) catch {
     Invalid(code, _, _) => assert_eq(code, "PARQUET_SHAPE")
@@ -94,7 +103,7 @@ test "Parquet page counts and expansion limits are enforced before allocation" {
     encoder.write_byte(0x00)
     encoder.write_byte(0x00)
     let bytes = encoder.to_bytes()
-    let meta : FooterValue = Obj(
+    let meta : FooterValue = test_footer_object(
       Map([
         (4, Num(1L)),
         (5, Num(1L)),
@@ -103,8 +112,8 @@ test "Parquet page counts and expansion limits are enforced before allocation" {
         (9, Num(4L)),
       ]),
     )
-    let group : FooterValue = Obj(
-      Map([(1, Seq([Obj(Map([(3, meta)]))])), (3, Num(1L))]),
+    let group : FooterValue = test_footer_object(
+      Map([(1, Seq([test_footer_object(Map([(3, meta)]))])), (3, Num(1L))]),
     )
     let fields : Map[Int32, FooterValue] = Map([(3, Num(1L)), (4, Seq([group]))])
     try validate_parquet_layout(fields, bytes, bytes.length(), 1) catch {
@@ -113,4 +122,35 @@ test "Parquet page counts and expansion limits are enforced before allocation" {
       _ => fail("Page allocation budget was ignored")
     }
   }
+}
+
+///|
+test "explicit IDs and identity partition values take precedence over legacy aliases" {
+  let root = test_footer_object(Map([(4, Blob(b"root")), (5, Num(2L))]))
+  fn leaf(name : Bytes, id : Int64?) -> FooterValue {
+    let field = Map([(1, Num(2L)), (3, Num(1L)), (4, Blob(name))])
+    if id is Some(n) {
+      field[9] = Num(n)
+    }
+    test_footer_object(field)
+  }
+  let wanted = Map([(7, true)])
+  let names = Map([("old", 7)])
+  let (_, chosen) = projection_leaves(
+    [root, leaf(b"old", None), leaf(b"new", Some(7L))],
+    wanted,
+    names,
+    Map([]),
+  )
+  assert_eq(chosen.map(c => c.ordinal), [1])
+  let idless = [root, leaf(b"old", None), leaf(b"unmapped", None)]
+  let (_, mapped) = projection_leaves(idless, wanted, names, Map([]))
+  assert_eq(mapped.map(c => c.ordinal), [0])
+  let (_, from_partition) = projection_leaves(
+    idless,
+    wanted,
+    names,
+    Map([(7, true)]),
+  )
+  assert_true(from_partition.is_empty())
 }

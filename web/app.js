@@ -121,7 +121,11 @@ function options(action) {
       : {}),
   };
 }
-async function loadSchema() {
+const scalarTypes = new Set([
+  "int", "long", "float", "double", "boolean", "string", "binary",
+  "date", "time", "timestamp", "timestamptz",
+]);
+async function loadSchema(columns) {
   const snapshot = metadata.snapshots.find((s) => s.id === selected);
   const schema =
     metadata.schemas.find(
@@ -132,13 +136,24 @@ async function loadSchema() {
           : snapshot?.schema_id),
     ) || metadata.schemas.find((s) => s.id === metadata.current_schema_id);
   const old = $("field").value;
-  $("field").innerHTML = schema.fields
+  const fields = schema.fields.filter((f) => scalarTypes.has(f.field_type));
+  $("field").innerHTML = fields
     .map(
       (f) =>
         `<option value="${escape(f.name)}" data-type="${escape(f.field_type)}">${escape(f.name)} · #${f.id}</option>`,
     )
     .join("");
-  if (schema.fields.some((f) => f.name === old)) $("field").value = old;
+  if (fields.some((f) => f.name === old)) $("field").value = old;
+  $("columns").replaceChildren(...fields.map((field) => {
+    const label = document.createElement("label");
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = field.name;
+    input.checked = columns ? columns.includes(field.name) : true;
+    input.disabled = busy;
+    label.append(input, field.name);
+    return label;
+  }));
 }
 function predicate() {
   const op = $("operator").value;
@@ -184,10 +199,11 @@ async function scan() {
     return;
   }
   status("正在解析清单并执行扫描…");
-  const opts = { ...options("scan"), filter: predicate(), limit: 1000 };
   let report;
   try {
-    report = await call(opts);
+    const columns = [...$("columns").querySelectorAll("input:checked")].map((input) => input.value);
+    if (!columns.length) throw {code: "INVALID_COLUMNS", message: "请至少选择一个可读取的标量输出列。"};
+    report = await call({ ...options("scan"), filter: predicate(), columns, limit: 1000 });
   } catch (e) {
     clearResults();
     await check();
@@ -222,7 +238,7 @@ async function scan() {
   $("row-summary").textContent =
     `${report.scan.rows.length} 条${report.scan.truncated ? " · 已截断" : ""}`;
   $("rows").innerHTML = report.scan.rows.length
-    ? `<table><thead><tr>${report.schema.fields.map((f) => `<th>${escape(f.name)}</th>`).join("")}<th>源文件行号</th></tr></thead><tbody>${report.scan.rows.map((r) => `<tr>${report.schema.fields.map((f) => `<td>${r.values[f.name] === null ? '<span class="null">NULL</span>' : escape(typeof r.values[f.name] === "object" ? JSON.stringify(r.values[f.name]) : r.values[f.name])}</td>`).join("")}<td title="${escape(r.file)}">${escape(r.position)}</td></tr>`).join("")}</tbody></table>`
+    ? `<table><thead><tr>${report.scan.schema.fields.map((f) => `<th>${escape(f.name)}</th>`).join("")}<th>源文件行号</th></tr></thead><tbody>${report.scan.rows.map((r) => `<tr>${report.scan.schema.fields.map((f) => `<td>${r.values[f.name] === null ? '<span class="null">NULL</span>' : escape(typeof r.values[f.name] === "object" ? JSON.stringify(r.values[f.name]) : r.values[f.name])}</td>`).join("")}<td title="${escape(r.file)}">${escape(r.position)}</td></tr>`).join("")}</tbody></table>`
     : '<div class="empty">没有符合条件的记录</div>';
   $("schema-id").textContent = `Schema #${report.schema.id}`;
   $("schema").innerHTML = report.schema.fields
@@ -279,7 +295,7 @@ async function check() {
         .join("")
     : `<div class="finding"><strong>通过</strong><div>已检查 ${result.checked_snapshots} 个快照、${result.checked_objects} 个引用对象，未发现引用缺失或大小异常。</div></div>`;
 }
-async function load(text, name, field) {
+async function load(text, name, field, columns) {
   source = text;
   selected = "";
   clearResults();
@@ -287,13 +303,20 @@ async function load(text, name, field) {
   selected = metadata.current_snapshot_id || "";
   $("source-name").textContent = name;
   timeline();
-  await loadSchema();
+  await loadSchema(columns);
   if (field) $("field").value = field;
   await scan();
 }
 async function demo(name) {
-  const type = ["deletes", "partitioned"].includes(name) ? name : "events";
-  const response = await fetch(`./${type}.icebundle.json`);
+  const demos = {
+    events: ["events", "订单演进 · 3 个快照", "id", ">=", "10"],
+    deletes: ["deletes", "标准 Avro / Parquet · 位置与等值删除", "id", "all", "10"],
+    partitioned: ["partitioned", "按天 → 按月分区 · ts 为 Unix 微秒 · 筛选 2024-03-01 及之后", "ts", ">=", "1709251200000000"],
+    broken: ["events", "故障注入 · 当前快照清单缺失", "id", "all", "10"],
+    "column-mapping": ["fixtures/duckdb/column-mapping", "DuckDB column_mapping · 以 age 筛选，读取 name", "age", ">=", "30", ["name"]],
+  };
+  const [asset, label, field, operator, literal, columns] = demos[name];
+  const response = await fetch(`./${asset}.icebundle.json`);
   if (!response.ok)
     throw {
       code: "DEMO_MISSING",
@@ -309,22 +332,12 @@ async function demo(name) {
     delete b.files[latest.manifest_list];
     text = JSON.stringify(b);
   }
-  $("operator").value = ["events", "partitioned"].includes(name) ? ">=" : "all";
-  $("literal").value = name === "partitioned" ? "1709251200000000" : "10";
+  $("operator").value = operator;
+  $("literal").value = literal;
   document
     .querySelectorAll("[data-demo]")
     .forEach((x) => x.classList.toggle("active", x.dataset.demo === name));
-  await load(
-    text,
-    name === "events"
-      ? "PyIceberg 真实生成 · 3 个快照"
-      : name === "deletes"
-        ? "标准 Avro / Parquet · 位置与等值删除"
-        : name === "partitioned"
-          ? "按天 → 按月分区 · ts 为 Unix 微秒 · 筛选 2024-03-01 及之后"
-          : "故障注入 · 当前快照清单缺失",
-    name === "partitioned" ? "ts" : "id",
-  );
+  await load(text, label, field, columns);
 }
 document
   .querySelectorAll("[data-demo]")
@@ -360,4 +373,4 @@ $("export").onclick = () => {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
-task(() => demo("events"));
+task(() => demo(location.hash === "#projection" ? "column-mapping" : "events"));

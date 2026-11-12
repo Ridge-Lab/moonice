@@ -5,7 +5,7 @@ priv enum FooterValue {
   Num(Int64)
   Blob(Bytes)
   Seq(Array[FooterValue])
-  Obj(Map[Int32, FooterValue])
+  Obj(Map[Int32, FooterValue], BytesView)
   Other
 }
 
@@ -115,6 +115,7 @@ fn FooterReader::value(
       Other
     }
     12 => {
+      let start = self.offset
       let values = Map([])
       let mut previous = 0
       while true {
@@ -142,7 +143,7 @@ fn FooterReader::value(
         previous = id
         values[id] = self.value(header & 15, depth + 1)
       }
-      Obj(values)
+      Obj(values, self.bytes[start:self.offset])
     }
     _ => raise Invalid("INVALID_PARQUET", "footer", "Unknown compact type")
   }
@@ -152,13 +153,14 @@ fn FooterReader::value(
 fn footer_num(fields : Map[Int32, FooterValue], id : Int32) -> Int64? {
   match fields.get(id) {
     Some(Num(n)) => Some(n)
-    Some(Blob(_) | Seq(_) | Obj(_) | Other) | None => None
+    Some(Blob(_) | Seq(_) | Obj(_, _) | Other) | None => None
   }
 }
 
 ///|
-/// Return flat leaf field IDs in Parquet column order; never guess from names.
-pub fn parquet_field_ids(bytes : Bytes) -> Array[Int32] raise IceError {
+fn parquet_footer(
+  bytes : Bytes,
+) -> (Map[Int32, FooterValue], Int32) raise IceError {
   let n = bytes.length()
   if n < 12 || bytes[:4] != b"PAR1" || bytes[n - 4:] != b"PAR1" {
     raise Invalid("INVALID_PARQUET", "footer", "Missing PAR1 magic")
@@ -172,9 +174,19 @@ pub fn parquet_field_ids(bytes : Bytes) -> Array[Int32] raise IceError {
     offset: 0,
     nodes: 0,
   }
-  guard reader.value(12, 0) is Obj(fields) else {
+  guard reader.value(12, 0) is Obj(fields, _) else {
     raise Invalid("INVALID_PARQUET", "footer", "Expected metadata struct")
   }
+  guard reader.offset == reader.bytes.length() else {
+    raise Invalid("INVALID_PARQUET", "footer", "Unexpected trailing metadata")
+  }
+  (fields, n - 8 - length.to_int())
+}
+
+///|
+/// Return flat leaf field IDs in Parquet column order; never guess from names.
+pub fn parquet_field_ids(bytes : Bytes) -> Array[Int32] raise IceError {
+  let (fields, footer_start) = parquet_footer(bytes)
   guard footer_num(fields, 3) is Some(rows) && rows >= 0L && rows <= 100000L else {
     raise Invalid(
       "RESOURCE_LIMIT", "footer", "Parquet footer exceeds 100,000 row limit",
@@ -183,7 +195,7 @@ pub fn parquet_field_ids(bytes : Bytes) -> Array[Int32] raise IceError {
   guard fields.get(2) is Some(Seq(elements)) && elements.length() > 0 else {
     raise Invalid("INVALID_PARQUET", "schema", "Schema is absent")
   }
-  guard elements[0] is Obj(root) &&
+  guard elements[0] is Obj(root, _) &&
     footer_num(root, 5) == Some((elements.length() - 1).to_int64()) else {
     raise Invalid(
       "UNSUPPORTED_NESTED", "schema", "Only flat primitive Parquet schemas are supported",
@@ -192,7 +204,7 @@ pub fn parquet_field_ids(bytes : Bytes) -> Array[Int32] raise IceError {
   let ids = []
   let seen = Map([])
   for i in 1..<elements.length() {
-    guard elements[i] is Obj(leaf) &&
+    guard elements[i] is Obj(leaf, _) &&
       footer_num(leaf, 1) is Some(_) &&
       footer_num(leaf, 5).unwrap_or(0L) == 0L &&
       footer_num(leaf, 3) != Some(2L) else {
@@ -216,6 +228,6 @@ pub fn parquet_field_ids(bytes : Bytes) -> Array[Int32] raise IceError {
     seen[id] = true
     ids.push(id.to_int())
   }
-  validate_parquet_layout(fields, bytes, n - 8 - length.to_int(), ids.length())
+  validate_parquet_layout(fields, bytes, footer_start, ids.length())
   ids
 }

@@ -25,19 +25,29 @@ pub fn scan_batches(
   read_file : (String) -> Bytes raise IceError,
   emit : (Array[DataRow]) -> Unit raise IceError,
   batch_size~ : Int32 = 1024,
+  columns? : Array[String],
+  name_mapping~ : Map[String, Int32] = Map([]),
 ) -> ScanSummary raise IceError {
   if batch_size < 1 || batch_size > 100000 {
     raise Invalid("INVALID_BATCH_SIZE", "batch_size", "Expected 1..100000")
   }
   let mut pending : Array[DataRow] = []
-  let result = walk_rows(metadata, state, predicate, read_file, row => {
-    pending.push(row)
-    if pending.length() == batch_size {
-      let ready = pending
-      pending = []
-      emit(ready)
-    }
-  })
+  let result = walk_rows(
+    metadata,
+    state,
+    predicate,
+    read_file,
+    row => {
+      pending.push(row)
+      if pending.length() == batch_size {
+        let ready = pending
+        pending = []
+        emit(ready)
+      }
+    },
+    columns?,
+    name_mapping~,
+  )
   if !pending.is_empty() {
     emit(pending)
   }
@@ -51,6 +61,8 @@ pub fn Bundle::scan_batches(
   emit : (Array[DataRow]) -> Unit raise IceError,
   snapshot_id? : Int64,
   batch_size~ : Int32 = 1024,
+  columns? : Array[String],
+  name_mapping~ : Map[String, Int32] = Map([]),
 ) -> ScanSummary raise IceError {
   scan_batches(
     self.metadata,
@@ -59,5 +71,7 @@ pub fn Bundle::scan_batches(
     path => self.read_file(path),
     emit,
     batch_size~,
+    columns?,
+    name_mapping~,
   )
 }

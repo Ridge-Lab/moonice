@@ -33,6 +33,7 @@ fn scan_json(result : ScanResult) -> Json raise IceError {
     ])
   })
   json_object([
+    ("schema", result.schema.to_json()),
     ("rows", Json(rows)),
     ("read_rows", Json(result.read_rows)),
     ("deleted_rows", Json(result.deleted_rows)),
@@ -47,8 +48,23 @@ fn request_inner(source : String, options : String) -> Json raise IceError {
     _ => raise Invalid("INVALID_JSON", "options", "Options are not valid JSON")
   }
   ignore(object(opts, "options"))
-  let bundle = open_bundle(source)
   let action = text_value(json_field(opts, "action"), "action")
+  let columns = match object(opts, "options").get("columns") {
+    None => None
+    Some(value) => {
+      guard action == "scan" else {
+        raise Invalid(
+          "INVALID_OPTION", "columns", "Column selection requires a scan",
+        )
+      }
+      Some(array_value(value, "columns").map(c => text_value(c, "columns")))
+    }
+  }
+  let (bundle, aliases) = if columns is Some(_) {
+    open_mapped_bundle(source)
+  } else {
+    (open_bundle(source), Map([]))
+  }
   if action == "inspect" {
     return bundle.metadata.to_json()
   }
@@ -112,6 +128,8 @@ fn request_inner(source : String, options : String) -> Json raise IceError {
           predicate,
           path => bundle.read_file(path),
           limit~,
+          columns?,
+          name_mapping=aliases,
         ),
       ),
     ),

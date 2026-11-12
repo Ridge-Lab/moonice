@@ -1,5 +1,16 @@
 # Validation record
 
+## 0.4.0 — 2026-11-12
+
+On DuckDB's unchanged `column_mapping` table, selecting `name` with `age >= 30`
+returns Bob and Charlie. PyArrow 25.0.1 identifies eight compressed column
+chunks (822 bytes) and two needed chunks (202 bytes). These are page-stream
+sizes; the local object reader transfers the entire 2,729-byte Parquet file.
+The oracle corrupts the first page of `id`. Selecting `name` still returns both
+rows and selecting `id` fails. Eight additional PyArrow samples cover empty
+files, nulls, two row groups, NONE/Snappy compression and v1/v2 data pages.
+Reproduce using `python scripts/verify.py --profile full --targets js`.
+
 ## 0.3.2 — 2026-11-11
 
 The 0.3.1 reader failed two regressions through `decode_manifest_list`. A valid block expanding to 8 MiB + 1 returned `INVALID_AVRO` after expansion. Appending three arbitrary bytes to a valid raw stream yielded a successful manifest. The live oracle now requires `RESOURCE_LIMIT` and `INVALID_AVRO` respectively. It also checks the exact 8 MiB boundary, truncated streams, extra datum bytes, sync markers, multi-block files from both fastavro writers and a snapshot ID larger than 2⁵³. The cumulative-budget test uses two one-byte datums so it exercises an overrun on the second block without a large allocation.

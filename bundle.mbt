@@ -19,6 +19,20 @@ pub(all) struct SnapshotState {
 /// Open an offline bundle. Raw metadata is a string to preserve 64-bit JSON IDs
 /// when a browser or another JSON consumer transports the outer document.
 pub fn open_bundle(source : String) -> Bundle raise IceError {
+  unpack_bundle(source).0
+}
+
+///|
+/// Open a bundle and retain the metadata aliases needed for projecting ID-less Parquet files.
+pub fn open_mapped_bundle(
+  source : String,
+) -> (Bundle, Map[String, Int32]) raise IceError {
+  let (bundle, metadata) = unpack_bundle(source)
+  (bundle, parse_name_mapping(metadata))
+}
+
+///|
+fn unpack_bundle(source : String) -> (Bundle, String) raise IceError {
   if source.length() > 128 * 1024 * 1024 {
     raise Invalid(
       "RESOURCE_LIMIT", "$", "Bundle JSON exceeds 128 MiB of code units",
@@ -36,9 +50,8 @@ pub fn open_bundle(source : String) -> Bundle raise IceError {
       "UNSUPPORTED_BUNDLE", "$", "Only bundle version 1 is supported",
     )
   }
-  let metadata = parse_metadata(
-    text_value(json_field(root, "metadata"), "metadata"),
-  )
+  let metadata_text = text_value(json_field(root, "metadata"), "metadata")
+  let metadata = parse_metadata(metadata_text)
   let encoded = object(json_field(root, "files"), "files")
   if encoded.length() > 10000 {
     raise Invalid("RESOURCE_LIMIT", "files", "Bundle exceeds 10,000 objects")
@@ -57,7 +70,7 @@ pub fn open_bundle(source : String) -> Bundle raise IceError {
     }
     files[path] = bytes
   }
-  { metadata, files, }
+  ({ metadata, files, }, metadata_text)
 }
 
 ///|

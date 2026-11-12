@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 — 2026-11-12
+
+- Scan selected top-level scalar columns by Iceberg ID, with explicit top-level name-mapping support for migrated Parquet tables. Unselected page payloads are skipped, including nested siblings. Residual filters and equality deletes can access hidden columns without exposing them in results.
+- Reproduce a DuckDB table scan with map, list and struct siblings and compare the scalar results against PyArrow. The CLI, batch API and registry-only consumer exercise the projection path.
+
 ## 0.3.3 — 2026-11-12
 
 - Recover an identity-partitioned field from the file's partition tuple when Parquet omits its physical column. Scans use the recovered value for projection, row filters and equality deletes. A physically stored null stays null.

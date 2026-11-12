@@ -26,6 +26,26 @@ fn main raise {
         @moonice.Invalid(code, _, _) => Json(code)
       }
     }
+    if transform == "parquet-select" {
+      guard value is Binary(data) && fields.get("rows") is Some(Number(n, ..)) else {
+        abort("Expected Parquet bytes and row count")
+      }
+      let file : @moonice.DataFile = {
+        path: "oracle.parquet",
+        format: "PARQUET",
+        content: 0,
+        record_count: n.to_int64(),
+        size_bytes: data.length().to_int64(),
+        partition: Map([]),
+        equality_ids: [],
+        lower_bounds: Map([]),
+        upper_bounds: Map([]),
+        null_counts: Map([]),
+        nan_counts: Map([]),
+      }
+      let rows = @moonice.read_data_rows(data, file, field_ids=[2])
+      return Json(rows.map(row => row.values[2].display_json()))
+    }
     if transform == "parquet-fields" {
       guard value is Binary(data) else { abort("Expected Parquet bytes") }
       return Json(

@@ -26,7 +26,7 @@
       ><a class="nav" href="#findings-section">◎ &nbsp; 引用诊断</a>
       <div class="sidebar-bottom">
         <span class="status-dot"></span> 本地浏览器运行
-        <p>MoonBit 原生核心<br />Iceberg v2 · 0.3.3</p>
+        <p>MoonBit 原生核心<br />Iceberg v2 · 0.4.0</p>
         <a
           href="https://iceberg.apache.org/spec/"
           target="_blank"
@@ -61,6 +61,7 @@
           ><button class="source active" data-demo="events">订单演进</button
           ><button class="source" data-demo="deletes">删除语义</button
           ><button class="source" data-demo="partitioned">分区演进</button
+          ><button class="source" data-demo="column-mapping">DuckDB 选列</button
           ><button class="source" data-demo="broken">缺失文件</button>
         </div>
         <span id="source-name">加载中…</span>
@@ -95,6 +96,10 @@
           aria-label="筛选值"
         /><button id="run">运行扫描 <span>↗</span></button>
       </section>
+      <fieldset class="column-picker">
+        <legend>输出列</legend>
+        <div id="columns"></div>
+      </fieldset>
       <section class="metrics" id="metrics">
         <article><span>保留文件</span><strong>—</strong></article>
         <article><span>裁剪文件</span><strong>—</strong></article>

@@ -77,7 +77,11 @@ fn demonstrate() -> Unit raise {
     @moonice.Invalid(code, _, _) => assert_eq(code, "INVALID_AVRO")
   } noraise { _ => fail("Published package accepted trailing DEFLATE data") }
   verify_identity_projection()
-  println("MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected deflate_tail=rejected identity_eu=2")
+  let (mixed, names) = @moonice.open_mapped_bundle(@fs.read_file_to_string("fixtures/duckdb/column-mapping.icebundle.json"))
+  let people = mixed.scan(Compare(3, Ge, Integer(30L)), columns=["name"], name_mapping=names)
+  assert_eq(people.rows.map(r => r.values.get(2)), [Some(Text("Bob")), Some(Text("Charlie"))])
+  assert_true(people.rows.iter().all(r => r.values.length() == 1))
+  println("MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected deflate_tail=rejected identity_eu=2 projected_names=2")
 }
 
 ///|
@@ -135,7 +139,7 @@ def write_consumer(directory: Path, version: str) -> None:
     shutil.copyfile(ROOT / "examples/library_read/moon.pkg", directory / "moon.pkg")
     (directory / "main.mbt").write_text(CONSUMER, encoding="utf-8")
     (directory / "fixtures/duckdb").mkdir(parents=True)
-    for fixture in ("deletes.icebundle.json", "duckdb/identity-source.icebundle.json", "duckdb/LICENSE"):
+    for fixture in ("deletes.icebundle.json", "duckdb/identity-source.icebundle.json", "duckdb/column-mapping.icebundle.json", "duckdb/LICENSE"):
         shutil.copyfile(ROOT / "fixtures" / fixture, directory / "fixtures" / fixture)
 
 
@@ -157,13 +161,17 @@ def main() -> int:
     installed_mod = directory / ".mooncakes" / "Ridge-Lab" / "moonice" / "moon.mod"
     installed = module_identity(installed_mod)
     require_identity(installed, args.version, "Installed package")
+    for name in ("column-mapping.icebundle.json", "identity-source.icebundle.json", "LICENSE"):
+        fixture = Path("fixtures/duckdb") / name
+        if (installed_mod.parent / fixture).read_bytes() != (ROOT / fixture).read_bytes():
+            raise ValueError(f"Installed DuckDB fixture or license differs: {name}")
     results = []
     for target in args.targets:
         subprocess.run(["moon", "check", "--target", target, "--deny-warn"], cwd=directory, check=True)
         run = subprocess.run(["moon", "run", "--target", target, "."], cwd=directory, check=True,
                              capture_output=True, text=True, encoding="utf-8", timeout=300)
         print(run.stdout, end="")
-        if "MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected deflate_tail=rejected identity_eu=2" not in run.stdout:
+        if "MOONICE_CONSUMER_OK physical=5 deleted=3 visible=2 selected_id=2 int_range=rejected deflate_tail=rejected identity_eu=2 projected_names=2" not in run.stdout:
             raise ValueError(f"{target}: successful exit without consumer assertions marker")
         results.append({"target": target, "exit_code": run.returncode, "stdout": run.stdout})
     require_identity(module_identity(installed_mod), args.version, "Installed package after execution")

@@ -80,6 +80,47 @@ def manifest_cases():
     return cases
 
 
+def verify_column_projection(node, directory):
+    """Compare against PyArrow and prove that pages outside the selection are skipped."""
+    import pyarrow.parquet as pq
+    bundle_path = ROOT / "fixtures/duckdb/column-mapping.icebundle.json"
+    bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    file = next(name for name in bundle["files"] if name.endswith(".parquet"))
+    payload = bytearray(base64.b64decode(bundle["files"][file], validate=True))
+    parquet = pq.ParquetFile(BytesIO(payload))
+    expected = [{"name": row["name"]} for row in parquet.read(columns=["age", "name"]).to_pylist()
+                if row["age"] >= 30]
+    cli = [node, str(ROOT / "_build/js/release/build/cmd/main/main.js"), "scan"]
+
+    def check(path, column="name"):
+        response = run_json(cli + [str(path), "--column", column, "--filter",
+                                   json.dumps({"field": "age", "op": ">=", "value": "30"})])
+        return [row["values"] for row in response["result"]["scan"]["rows"]]
+
+    if check(bundle_path) != expected:
+        raise AssertionError("Mixed-schema projection differs from PyArrow")
+    # The compressed page containing id becomes unreadable. A projection that
+    # accidentally opens every column fails here even if it drops id afterwards.
+    chunks = [parquet.metadata.row_group(0).column(i) for i in range(parquet.metadata.num_columns)]
+    id_chunk = next(c for c in chunks if c.path_in_schema == "id")
+    start = id_chunk.dictionary_page_offset if id_chunk.has_dictionary_page else id_chunk.data_page_offset
+    payload[start] = 0  # prematurely terminate this Thrift page header
+    bundle["files"][file] = base64.b64encode(payload).decode("ascii")
+    corrupted = directory / "invalid-unselected-page.icebundle.json"
+    corrupted.write_text(json.dumps(bundle), encoding="utf-8")
+    if check(corrupted) != expected:
+        raise AssertionError("Skipped column affected a successful projection")
+    rejected = subprocess.run(cli + [str(corrupted), "--column", "id"], cwd=ROOT,
+                              capture_output=True, text=True, encoding="utf-8", timeout=30)
+    if rejected.returncode != 1 or json.loads(rejected.stdout).get("ok") is not False:
+        raise AssertionError("Corrupted selected column was accepted")
+    return {"rows": expected, "total_leaf_chunks": len(chunks), "selected_chunks": 2,
+            "selected_compressed_bytes": sum(c.total_compressed_size for c in chunks
+                                             if c.path_in_schema in ("age", "name")),
+            "total_compressed_bytes": sum(c.total_compressed_size for c in chunks),
+            "corrupt_unselected_column_skipped": True}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
@@ -128,7 +169,11 @@ def main():
                                data_page_version=page_version, row_group_size=2)
                 cases.append({"type": "binary", "transform": "parquet-fields", "input": wire(sink.getvalue().to_pybytes())})
                 expected.append([1, 2])
-    parquet_count = len(cases) - transform_count
+                cases.append({"type": "binary", "transform": "parquet-select", "rows": len(rows),
+                              "input": wire(sink.getvalue().to_pybytes())})
+                expected.append([r["label"] for r in rows])
+    parquet_count = sum(case["transform"] == "parquet-fields" for case in cases)
+    projection_count = sum(case["transform"] == "parquet-select" for case in cases)
     manifests = manifest_cases()
     for data, result in manifests:
         cases.append({"type": "binary", "transform": "manifest-list", "input": wire(data)})
@@ -160,9 +205,11 @@ def main():
             raise AssertionError({"case": case, "actual_ids": ids, "actual_files": files})
         scans.append({"case": case["label"], "rows": len(ids), "files": len(files)})
     report = {"status": "passed", "seed": args.seed, "pyiceberg": pyiceberg.__version__, "pyarrow": pyarrow.__version__,
-              "transform_cases": transform_count, "parquet_preflight_cases": parquet_count, "avro_container_cases": len(manifests),
+              "transform_cases": transform_count, "parquet_preflight_cases": parquet_count,
+              "parquet_projection_cases": projection_count, "avro_container_cases": len(manifests),
               "corpus_sha256": hashlib.sha256(corpus.read_bytes()).hexdigest(), "scans": scans,
-              "limits": "Synthetic bounded samples; live PyIceberg plan/row oracle. Does not certify all Iceberg versions or equality-delete execution."}
+              "duckdb_projection": verify_column_projection(args.node, args.output.parent),
+              "limits": "Synthetic PyIceberg tables and a fixed DuckDB test table. These checks cover the reported cases."}
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report))
 

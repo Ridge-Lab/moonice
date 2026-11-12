@@ -45,6 +45,7 @@ fn restore_identity_columns(
   metadata : TableMetadata,
   entry : ManifestEntry,
   rows : Array[DataRow],
+  wanted? : Map[Int32, Bool],
 ) -> Unit raise IceError {
   guard rows.length() > 0 else { return }
   guard metadata.partition_specs.iter().find_first(s => s.id == entry.spec_id)
@@ -58,6 +59,7 @@ fn restore_identity_columns(
   // A flat Parquet file uses the same physical column IDs for every row.
   for field in spec.fields {
     if field.transform == "identity" &&
+      (wanted is None || (wanted is Some(ids) && ids.contains(field.source_id))) &&
       !rows[0].values.contains(field.source_id) &&
       entry.file.partition.get(field.name) is Some(value) {
       if rows[0].values.length() + 1 > 5000000 / rows.length() {
@@ -81,8 +83,28 @@ fn walk_rows(
   predicate : Predicate,
   read_file : (String) -> Bytes raise IceError,
   on_row : (DataRow) -> Unit raise IceError,
+  columns? : Array[String],
+  name_mapping~ : Map[String, Int32] = Map([]),
 ) -> ScanSummary raise IceError {
   let plan = plan_scan(metadata, state, predicate)
+  let output = match columns {
+    None => state.schema
+    Some(names) => select_schema(state.schema, names)
+  }
+  let needed : Map[Int32, Bool] = Map([])
+  let validation = if columns is Some(_) {
+    predicate_ids(predicate, needed)
+    for field in output.fields {
+      needed[field.id] = true
+    }
+    let fields = state.schema.fields.filter(field => needed.contains(field.id))
+    for field in fields {
+      projection_field(field)
+    }
+    { ..state.schema, fields, }
+  } else {
+    state.schema
+  }
   let deletions = state.entries.filter(e => e.file.content != 0)
   let indexes : Map[String, DeleteIndex] = Map([])
   let mut read_rows = 0
@@ -96,26 +118,70 @@ fn walk_rows(
     }
     let entry = decision.entry
     scanned_files += 1
-    let rows = read_data_rows(read_file(entry.file.path), entry.file)
+    let applicable = deletions.filter(d => {
+      explain_delete(metadata, entry, d).applies
+    })
+    let physical = if columns is Some(_) {
+      let ids = needed.copy()
+      for deletion in applicable {
+        for id in deletion.file.equality_ids {
+          ids[id] = true
+        }
+      }
+      Some(ids)
+    } else {
+      None
+    }
+    let identity_ids = Map([])
+    if columns is Some(_) &&
+      metadata.partition_specs.iter().find_first(s => s.id == entry.spec_id)
+      is Some(spec) {
+      for field in spec.fields {
+        if field.transform == "identity" &&
+          entry.file.partition.contains(field.name) {
+          identity_ids[field.source_id] = true
+        }
+      }
+    }
+    let rows = read_file_columns(
+      read_file(entry.file.path),
+      entry.file,
+      physical,
+      name_mapping,
+      identity_ids~,
+    )
     read_rows += rows.length()
     if read_rows > 1000000 {
       raise Invalid(
         "RESOURCE_LIMIT", "scan", "Scan exceeds one million data rows",
       )
     }
-    restore_identity_columns(metadata, entry, rows)
+    restore_identity_columns(metadata, entry, rows, wanted?=physical)
     let positions : Map[Int64, Bool] = Map([])
     let equality : Array[(Array[Int32], Map[String, Bool])] = []
-    for deletion in deletions {
-      if !explain_delete(metadata, entry, deletion).applies {
-        continue
-      }
+    for deletion in applicable {
       let index = match indexes.get(deletion.file.path) {
         Some(index) => index
         None => {
-          let rows = read_data_rows(
+          let delete_ids = if columns is Some(_) {
+            let ids : Map[Int32, Bool] = Map([])
+            if deletion.file.content == 1 {
+              ids[2147483546] = true
+              ids[2147483545] = true
+            } else {
+              for id in deletion.file.equality_ids {
+                ids[id] = true
+              }
+            }
+            Some(ids)
+          } else {
+            None
+          }
+          let rows = read_file_columns(
             read_file(deletion.file.path),
             deletion.file,
+            delete_ids,
+            name_mapping,
           )
           total_delete_rows += rows.length()
           if total_delete_rows > 100000 {
@@ -159,16 +225,24 @@ fn walk_rows(
         continue
       }
       // Validate selected schema even for rows later excluded by the predicate.
-      ignore(row.project(state.schema))
+      ignore(row.project(validation))
       if predicate.matches(row.values) {
         matched_rows += 1
-        on_row(row)
+        if columns is Some(_) {
+          let values = Map([])
+          for field in output.fields {
+            values[field.id] = row.values.get(field.id).unwrap_or(Missing)
+          }
+          on_row({ ..row, values, })
+        } else {
+          on_row(row)
+        }
       }
     }
   }
   {
     snapshot_id: state.snapshot.id,
-    schema: state.schema,
+    schema: output,
     read_rows,
     deleted_rows,
     matched_rows,
@@ -186,16 +260,22 @@ pub fn scan_rows(
   predicate : Predicate,
   read_file : (String) -> Bytes raise IceError,
   limit~ : Int32 = 1000,
+  columns? : Array[String],
+  name_mapping~ : Map[String, Int32] = Map([]),
 ) -> ScanResult raise IceError {
   if limit < 0 || limit > 100000 {
     raise Invalid("INVALID_LIMIT", "limit", "Expected 0..100000")
   }
   let rows = []
-  let summary = walk_rows(metadata, state, predicate, read_file, row => {
-    if rows.length() < limit {
-      rows.push(row)
-    }
-  })
+  let summary = walk_rows(
+    metadata,
+    state,
+    predicate,
+    read_file,
+    row => if rows.length() < limit { rows.push(row) },
+    columns?,
+    name_mapping~,
+  )
   {
     snapshot_id: summary.snapshot_id,
     schema: summary.schema,
@@ -213,6 +293,8 @@ pub fn Bundle::scan(
   predicate : Predicate,
   snapshot_id? : Int64,
   limit~ : Int32 = 1000,
+  columns? : Array[String],
+  name_mapping~ : Map[String, Int32] = Map([]),
 ) -> ScanResult raise IceError {
   scan_rows(
     self.metadata,
@@ -220,5 +302,7 @@ pub fn Bundle::scan(
     predicate,
     path => self.read_file(path),
     limit~,
+    columns?,
+    name_mapping~,
   )
 }

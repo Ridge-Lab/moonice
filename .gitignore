@@ -11,6 +11,7 @@ web/*.icebundle.json
 web/LICENSE
 web/THIRD_PARTY.md
 web/licenses/
+web/fixtures/
 integrations/moonframe/moon.work
 
 # Entrant forms and private handoff bundles belong outside this repository.

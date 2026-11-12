@@ -41,10 +41,19 @@ for root in (ROOT / "web", cli):
     for name in ("LICENSE", "THIRD_PARTY.md"):
         assert (root / name).read_bytes() == (ROOT / name).read_bytes()
 assert (ROOT / "web/moonice.js").stat().st_size > 0
+sample = Path("fixtures/duckdb/column-mapping.icebundle.json")
+for path in (sample, sample.with_name("LICENSE")):
+    for stage in (cli, ROOT / "web"):
+        assert (stage / path).read_bytes() == (ROOT / path).read_bytes()
+names = subprocess.check_output([a.node, str(cli / "moonice.mjs"), "scan", str(sample), "--column", "name"],
+                                cwd=cli, timeout=120)
+assert [r["values"] for r in json.loads(names)["result"]["scan"]["rows"]] == [
+    {"name": "Alice"}, {"name": "Bob"}, {"name": "Charlie"}]
 result = subprocess.run([a.node, str(cli / "moonice.mjs"), "scan", "fixtures/deletes.icebundle.json"], cwd=cli,
                         check=True, capture_output=True, text=True, encoding="utf-8", timeout=120)
 response = json.loads(result.stdout)
 assert response["ok"] and response["result"]["scan"]["matched_rows"] == 2
+subprocess.run([a.node, str(ROOT / "scripts/verify_worker.mjs")], cwd=ROOT, check=True, timeout=120)
 a.output.write_text(json.dumps({"status": "passed", "version": version, "sdk_home": str(sdk_home), "notice_sha256": hashes,
                                "cli_sha256": hashlib.sha256((cli / "moonice.mjs").read_bytes()).hexdigest()}, indent=2) + "\n")
-print(f"Distribution {version}: notices and staged CLI passed")
+print(f"Distribution {version}: notices, browser worker and staged CLI passed")

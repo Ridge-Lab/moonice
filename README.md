@@ -4,7 +4,7 @@
 
 从标准 `metadata.json → manifest list → manifest → Parquet` 追踪一次读取：哪些文件参与扫描、哪些被排除、为什么删除文件会影响某些数据、字段改名后旧文件如何读取。核心表语义使用 MoonBit 实现；命令行和浏览器工作台共用同一套 API。
 
-这是可运行的 **0.3.3 有界实现**，使用 MoonBit 0.10.20。支持范围见 [兼容性说明](docs/COMPATIBILITY.md)，不代表完整 Iceberg 引擎或生产级数据湖服务。
+这是可运行的 **0.4.0 有界实现**，使用 MoonBit 0.10.20。支持范围见 [兼容性说明](docs/COMPATIBILITY.md)，不代表完整 Iceberg 引擎或生产级数据湖服务。
 
 读取压缩清单时，先检查各块边界、记录总数和同步标记，再核对 DEFLATE 展开长度。单块超过 8 MiB 或清单累计展开超过 64 MiB 时，读取器在分配该块输出前返回 `RESOURCE_LIMIT`。已通过 fastavro 写入的多块清单和标准 raw DEFLATE 样本验证。
 
@@ -36,13 +36,13 @@ moon run --target js examples/library_read
 
 ```sh
 moon update
-moon add Ridge-Lab/moonice@0.3.3
+moon add Ridge-Lab/moonice@0.4.0
 ```
 
 在调用方 `moon.pkg` 中加入 `import { "Ridge-Lab/moonice" @ice }`，使用[可执行 API 示例](README.mbt.md)。运行本仓库的完整示例：
 
 ```sh
-git clone --branch v0.3.3 https://github.com/Ridge-Lab/moonice.git
+git clone --branch v0.4.0 https://github.com/Ridge-Lab/moonice.git
 cd moonice
 moon version --all
 moon update
@@ -63,7 +63,9 @@ npm run build
 python -m http.server 8765 --bind 127.0.0.1 --directory web
 ```
 
-打开 <http://127.0.0.1:8765>。页面提供订单演进、删除语义、分区演进、缺失清单四个演示，也支持导入自己的离线数据包。没有服务器端数据处理或上传接口。扫描在 Web Worker 内运行。
+打开 <http://127.0.0.1:8765>。工作台提供订单演进、删除语义、分区演进、DuckDB 选列与缺失清单示例，支持导入本地数据包。扫描在浏览器的 Web Worker 内运行。
+
+[打开 DuckDB 选列示例](https://ridge-lab.github.io/moonice/#projection)后，结果表只显示姓名和源文件行号。默认筛选条件 `age >= 30` 命中 Bob 和 Charlie。把阈值改为 35 并重新运行，只剩 Charlie。网页和 CLI 发行包同时附有[原始测试表的 MIT 许可证](fixtures/duckdb/LICENSE)。
 
 ## 可复现的使用场景
 
@@ -74,6 +76,25 @@ python -m http.server 8765 --bind 127.0.0.1 --directory web
 5. **接入分析流水线。** “分区演进”样本含两代快照和六份 Snappy Parquet 文件，分区由 `day(ts)` 改为 `month(ts)`。筛选 2024-03-01 起的数据时，按各文件自己的规格裁剪到两份文件。运行 `moon run --target js examples/batch_read`，逐批处理两行并得到 ID 合计 21；调用方不必收集完整结果数组。仍按整文件解码，内存限制见兼容性说明。
 
 ## 命令行
+
+在 DuckDB 的公开测试表中，姓名、年龄与地图、列表、结构体存储在同一份 Parquet 文件，物理列没有字段 ID。以下命令使用表元数据中的名称映射，读取 `name` 和过滤所需的 `age`，返回 Bob 和 Charlie 两个姓名。
+
+```sh
+moon run --target js cmd/main -- scan fixtures/duckdb/column-mapping.icebundle.json --column name --filter '{"field":"age","op":">=","value":"30"}'
+```
+
+可重复传入 `--column`。MoonBit 调用示例：
+
+```moonbit
+let (bundle, mapping) = @moonice.open_mapped_bundle(source)
+let result = bundle.scan(
+  Compare(3, Ge, Integer(30L)),
+  columns=["name"],
+  name_mapping=mapping,
+)
+```
+
+`scan_rows` 和 `scan_batches` 支持相同的参数。有明确物理字段 ID 的表可直接使用 `open_bundle` 和 `columns`。选列先按文件 ID 绑定，再处理缺失列的恒等分区值和显式别名。过滤和等值删除所需的列会参与解码，输出只含指定的字段。存储回调仍读入完整文件；MoonIce 将所需压缩列块送入页解码器。嵌套值本身的读取仍有限制。[上游表与许可](docs/PROVENANCE.md)
 
 ```sh
 moon run --target js cmd/main -- inspect fixtures/events.icebundle.json
@@ -143,7 +164,7 @@ python scripts/verify.py --profile quick --targets js wasm wasm-gc
 python -m pip install -r tools/requirements-reference.txt
 python scripts/verify.py --profile full --targets js wasm wasm-gc native
 # 发布到Mooncakes后，在没有本地替换的新消费者中验证
-python scripts/verify.py --profile release --version 0.3.3 --targets js wasm wasm-gc native
+python scripts/verify.py --profile release --version 0.4.0 --targets js wasm wasm-gc native
 ```
 
 完整验证使用种子 `20261110` 的 1377 个变换对照、新建分区演进表的四次扫描，以及空表/多行组/字典/数据页V1和V2的8个PyArrow文件。生成数据只放在本次运行目录，不改冻结样本。`full` 缺少参考依赖会失败，不伪装成已通过。native 需要可用的 C 工具链，Windows CI 配置 MSVC。工具的故障契约也有回归：子进程失败、工具缺失、产物缺失和依赖失败都不能产生成功报告。详见[验证记录](docs/VALIDATION.md)。

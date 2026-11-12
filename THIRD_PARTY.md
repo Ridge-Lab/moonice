@@ -26,6 +26,11 @@ and fastavro (MIT). These Python programs are reference tooling; Python and thos
 libraries are not included in the browser executable. See the source repository's
 `docs/PROVENANCE.md` for implementation and reference-data provenance.
 
+The `column-mapping` sample contains test-table objects from the
+[DuckDB Iceberg extension](https://github.com/duckdb/duckdb-iceberg/tree/ac8740d514aadfa82c0b6545c23647167ff6dfcf/data/persistent/column_mapping).
+The sample is covered by the DuckDB Foundation's MIT license, included next
+to the fixture in the CLI and browser distributions.
+
 The core license and notice files are copied byte-for-byte from the pinned
 `0.10.20+65efd5b93` SDK's `lib/core/`. When changing the toolchain, refresh both
 files from the matching SDK and retain them in browser and CLI archives.

@@ -1,10 +1,10 @@
 ///|
 fn usage() -> Unit {
-  println("MoonIce 0.3.3 — Iceberg v2 snapshot inspector")
+  println("MoonIce 0.4.0 — Iceberg v2 snapshot inspector")
   println("moon run cmd/main --target js -- <action> <bundle> [options]")
   println("Actions: inspect, plan, scan, diff, check")
   println(
-    "Options: --snapshot ID | --ref NAME, --filter JSON, --filter-file PATH, --limit N, --from ID",
+    "Options: --snapshot ID | --ref NAME, --filter JSON, --filter-file PATH, --column NAME (repeatable for scan), --limit N, --from ID",
   )
   println(
     "Pack local standard files: pack <metadata.json> --objects <uri-to-local-path.json> --out <bundle.json>",
@@ -24,9 +24,15 @@ fn execute(args : Array[String]) -> Int32 raise {
   let action = args[1]
   let input = args[2]
   let opts : Map[String, String] = Map([])
+  let columns : Array[String] = []
   let mut i = 3
   while i < args.length() {
     let name = args[i]
+    if name == "--column" && action == "scan" && i + 1 < args.length() {
+      columns.push(args[i + 1])
+      i += 2
+      continue
+    }
     if ![
         "--snapshot", "--ref", "--filter", "--filter-file", "--limit", "--from",
         "--objects", "--out",
@@ -78,6 +84,9 @@ fn execute(args : Array[String]) -> Int32 raise {
     return 2
   }
   let options : Map[String, Json] = Map([("action", Json::string(action))])
+  if !columns.is_empty() {
+    options["columns"] = Json(columns)
+  }
   for name in ["snapshot", "ref", "from"] {
     if opts.get("--\{name}") is Some(value) {
       options[name] = Json::string(value)

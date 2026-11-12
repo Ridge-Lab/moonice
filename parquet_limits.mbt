@@ -39,7 +39,7 @@ fn validate_parquet_layout(
   let ranges : Array[(Int32, Int32)] = []
   let reader = FooterReader::{ bytes, offset: 0, nodes: 0, }
   for group in groups {
-    guard group is Obj(group) &&
+    guard group is Obj(group, _) &&
       group.get(1) is Some(Seq(columns)) &&
       columns.length() == leaves else {
       raise Invalid(
@@ -49,7 +49,7 @@ fn validate_parquet_layout(
     let group_rows = bounded_footer_num(group, 3, rows - counted_rows)
     counted_rows += group_rows
     for column in columns {
-      guard column is Obj(chunk) && chunk.get(3) is Some(Obj(meta)) else {
+      guard column is Obj(chunk, _) && chunk.get(3) is Some(Obj(meta, _)) else {
         raise Invalid("INVALID_PARQUET", "footer", "Column metadata is absent")
       }
       if chunk.contains(1) {
@@ -95,7 +95,7 @@ fn validate_parquet_layout(
       let mut dictionary_seen = false
       while reader.offset < finish {
         let before = reader.offset
-        guard reader.value(12, 0) is Obj(page) else {
+        guard reader.value(12, 0) is Obj(page, _) else {
           raise Invalid("INVALID_PARQUET", "page", "Expected page header")
         }
         let header_bytes = (reader.offset - before).to_int64()
@@ -117,7 +117,7 @@ fn validate_parquet_layout(
         }
         match footer_num(page, 1) {
           Some(0L) => {
-            guard page.get(5) is Some(Obj(data)) else {
+            guard page.get(5) is Some(Obj(data, _)) else {
               raise Invalid(
                 "INVALID_PARQUET", "page", "Missing data page header",
               )
@@ -127,7 +127,7 @@ fn validate_parquet_layout(
           Some(2L) => {
             guard !dictionary_seen &&
               page_values == 0L &&
-              page.get(7) is Some(Obj(dictionary)) else {
+              page.get(7) is Some(Obj(dictionary, _)) else {
               raise Invalid(
                 "INVALID_PARQUET", "page", "Invalid dictionary page order",
               )
@@ -136,7 +136,7 @@ fn validate_parquet_layout(
             ignore(bounded_footer_num(dictionary, 1, 100000L))
           }
           Some(3L) => {
-            guard page.get(8) is Some(Obj(data)) else {
+            guard page.get(8) is Some(Obj(data, _)) else {
               raise Invalid(
                 "INVALID_PARQUET", "page", "Missing v2 data page header",
               )
